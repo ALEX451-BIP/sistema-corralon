@@ -1,0 +1,2117 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistema Corralón Pro - Gestión Total</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <style>
+        :root {
+            --pri: #f97316;
+            --pri-2: #fbbf24;
+            --pri-grad: linear-gradient(135deg, #f97316, #fbbf24);
+            --ink: #0f172a;
+            --muted: #64748b;
+            --line: #e2e8f0;
+            --bg: #eef2f7;
+            --card: #ffffff;
+            --shadow-sm: 0 1px 2px rgba(15, 23, 42, .04), 0 10px 28px rgba(15, 23, 42, .06);
+            --shadow-md: 0 4px 12px rgba(15, 23, 42, .07), 0 20px 48px rgba(15, 23, 42, .12);
+            --radius: 18px;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        html { scroll-behavior: smooth; }
+        body {
+            font-family: 'Inter', 'Segoe UI', system-ui, sans-serif;
+            background-color: var(--bg);
+            background-image:
+                radial-gradient(1100px 550px at 105% -10%, rgba(249, 115, 22, .09), transparent 60%),
+                radial-gradient(900px 500px at -10% 115%, rgba(251, 191, 36, .08), transparent 60%);
+            background-attachment: fixed;
+            color: var(--ink);
+            -webkit-font-smoothing: antialiased;
+        }
+        ::selection { background: rgba(249, 115, 22, .18); }
+
+        ::-webkit-scrollbar { width: 10px; height: 10px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 8px; border: 2px solid transparent; background-clip: content-box; }
+        ::-webkit-scrollbar-thumb:hover { background: #94a3b8; border: 2px solid transparent; background-clip: content-box; }
+        .sidebar::-webkit-scrollbar-thumb { background: #3a3228; border: 2px solid transparent; background-clip: content-box; }
+
+        /* SIDEBAR */
+        .sidebar {
+            position: fixed; top: 0; left: 0; height: 100vh; width: 268px;
+            background: linear-gradient(180deg, #1b140e 0%, #0d0c09 100%);
+            color: #fff; padding: 22px 14px; transition: all .3s; z-index: 1050; overflow-y: auto;
+            border-right: 1px solid rgba(255, 255, 255, .06);
+        }
+        .sidebar .brand { display: flex; align-items: center; gap: 12px; padding: 0 8px 22px; border-bottom: 1px solid rgba(255, 255, 255, .08); margin-bottom: 18px; }
+        .sidebar .brand-icon {
+            width: 44px; height: 44px; border-radius: 13px; flex: 0 0 auto;
+            background: var(--pri-grad); display: flex; align-items: center; justify-content: center;
+            font-size: 1.2rem; box-shadow: 0 8px 20px rgba(249, 115, 22, .45); color: #1a1a1a;
+        }
+        .sidebar .brand-text b { font-size: 1.12rem; font-weight: 800; letter-spacing: .2px; display: block; line-height: 1.1; }
+        .sidebar .brand-text small { color: #a89a82; font-size: .68rem; font-weight: 700; text-transform: uppercase; letter-spacing: 1.2px; }
+        .sidebar .nav-item {
+            display: flex; align-items: center; gap: 13px;
+            padding: 11px 14px; margin: 3px 10px; border-radius: 12px; cursor: pointer;
+            color: #b3a48c; font-weight: 600; font-size: .9rem; transition: all .18s;
+        }
+        .sidebar .nav-item i { width: 22px; text-align: center; font-size: 1.02rem; }
+        .sidebar .nav-item:hover { background: rgba(255, 255, 255, .07); color: #fff; }
+        .sidebar .nav-item.active {
+            background: var(--pri-grad); color: #1a1a1a;
+            box-shadow: 0 10px 24px rgba(249, 115, 22, .5);
+        }
+        .nav-label { color: #7d7057; font-size: .62rem; font-weight: 700; text-transform: uppercase; letter-spacing: 1.5px; padding: 16px 22px 4px; }
+
+        /* TOPBAR */
+        .topbar { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 4px 2px 22px; flex-wrap: wrap; }
+        .topbar .tb-title h1 { font-size: 1.5rem; font-weight: 800; margin: 0; letter-spacing: -.4px; display: flex; align-items: center; gap: 12px; }
+        .topbar .tb-title h1 i { color: var(--pri); }
+        .topbar .tb-title p { margin: 3px 0 0; color: var(--muted); font-size: .85rem; }
+        .tb-date {
+            background: var(--card); border: 1px solid var(--line); border-radius: 999px;
+            padding: 9px 18px; font-size: .85rem; font-weight: 700; color: #334155;
+            display: flex; align-items: center; gap: 9px; box-shadow: var(--shadow-sm);
+        }
+        .tb-date i { color: var(--pri); }
+
+        .main-content { margin-left: 268px; padding: 24px 30px 44px; min-height: 100vh; }
+        .page { display: none; animation: fade .35s ease; }
+        .page.active { display: block; }
+        @keyframes fade { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+
+        /* STAT CARDS */
+        .stat-card {
+            background: var(--card); border-radius: var(--radius); padding: 20px;
+            box-shadow: var(--shadow-sm); border: 1px solid rgba(226, 232, 240, .75);
+            display: flex; gap: 16px; align-items: center; height: 100%;
+            transition: transform .25s, box-shadow .25s; position: relative; overflow: hidden;
+        }
+        .stat-card::before {
+            content: ''; position: absolute; inset: 0 0 auto 0; height: 4px; border-radius: 18px 18px 0 0;
+            background: var(--ic, #f97316); opacity: .9;
+        }
+        .stat-card:hover { transform: translateY(-4px); box-shadow: var(--shadow-md); }
+        .stat-icon {
+            width: 52px; height: 52px; border-radius: 14px; flex: 0 0 auto;
+            display: flex; align-items: center; justify-content: center; font-size: 1.3rem; color: #fff;
+            background: var(--ic, #f97316); box-shadow: 0 8px 18px var(--ics, rgba(249, 115, 22, .35));
+        }
+        .stat-body { min-width: 0; }
+        .stat-card .label { color: var(--muted); font-size: .73rem; font-weight: 700; text-transform: uppercase; letter-spacing: .6px; }
+        .stat-card .value { font-size: 1.45rem; font-weight: 800; margin-top: 3px; letter-spacing: -.3px; line-height: 1.15; white-space: nowrap; }
+        .stat-card[data-c="blue"] { --ic: #f97316; --ics: rgba(249, 115, 22, .35); }
+        .stat-card[data-c="indigo"] { --ic: #fbbf24; --ics: rgba(251, 191, 36, .35); }
+        .stat-card[data-c="green"] { --ic: #10b981; --ics: rgba(16, 185, 129, .35); }
+        .stat-card[data-c="orange"] { --ic: #eab308; --ics: rgba(234, 179, 8, .35); }
+        .stat-card[data-c="purple"] { --ic: #ea580c; --ics: rgba(234, 88, 12, .35); }
+        .stat-card[data-c="red"] { --ic: #ef4444; --ics: rgba(239, 68, 68, .35); }
+
+        .text-primary { color: #f97316 !important; }
+        .border-primary { border-color: #f97316 !important; }
+        .btn-primary { background: var(--pri-grad); border: none; color: #1a1a1a; }
+        .btn-primary:hover { background: var(--pri-grad); filter: brightness(1.08); color: #1a1a1a; }
+        .btn-outline-primary { color: #f97316; border-color: #f97316; }
+        .btn-outline-primary:hover { background: #f97316; border-color: #f97316; color: #fff; }
+        .badge-primary { background: #f97316; }
+
+        /* PANELS */
+        .panel {
+            background: var(--card); border-radius: var(--radius); padding: 22px;
+            box-shadow: var(--shadow-sm); border: 1px solid rgba(226, 232, 240, .75); margin-top: 20px;
+        }
+        .panel h4, .panel h5 { font-weight: 800; letter-spacing: -.2px; }
+        .panel h5 i, .panel h4 i { color: var(--pri); }
+
+        /* TABLES */
+        .table { --bs-table-bg: transparent; }
+        .table thead th {
+            border-bottom: 1px solid var(--line); color: var(--muted);
+            text-transform: uppercase; letter-spacing: .5px; font-size: .7rem; font-weight: 800; white-space: nowrap;
+        }
+        .table tbody tr { transition: background .15s; }
+        .table-hover tbody tr:hover { background-color: #f1f5f9; }
+        .table tbody td { padding: .65rem .6rem; border-bottom: 1px solid #f1f5f9; vertical-align: middle; }
+
+        /* BUTTONS */
+        .btn { border-radius: 11px; font-weight: 700; letter-spacing: .2px; transition: all .18s; }
+        .btn-lg { border-radius: 13px; }
+        .btn:active { transform: scale(.97); }
+        .btn-primary-custom {
+            background: var(--pri-grad); border: none; color: #1a1a1a;
+            box-shadow: 0 8px 18px rgba(249, 115, 22, .28);
+        }
+        .btn-primary-custom:hover, .btn-primary-custom:focus { background: var(--pri-grad); filter: brightness(1.05); color: #1a1a1a; }
+        .btn-success { box-shadow: 0 8px 18px rgba(16, 185, 129, .25); }
+
+        /* FORMS */
+        .form-control, .form-select {
+            border-radius: 11px; border: 1px solid #cbd5e1; padding: .52rem .85rem; font-size: .92rem;
+            background-color: #fff; box-shadow: none;
+        }
+        .form-control:focus, .form-select:focus { border-color: #f97316; box-shadow: 0 0 0 4px rgba(249, 115, 22, .16); }
+        .form-label { font-size: .78rem; font-weight: 700; }
+        .form-check-input:checked { background-color: #f97316; border-color: #f97316; }
+
+        /* TOTALS BOX */
+        .totals {
+            background: linear-gradient(135deg, #0f172a, #1e293b); color: #fff;
+            border-radius: 16px; padding: 18px 22px;
+            box-shadow: 0 14px 34px rgba(15, 23, 42, .3);
+        }
+        .totals h4 { font-size: 1.02rem; font-weight: 700; }
+        .totals .text-success { color: #34d399 !important; }
+        .totals .text-danger { color: #f87171 !important; }
+        .totals .text-dark { color: #e2e8f0 !important; }
+
+        /* MODALS */
+        .modal-content { border: none; border-radius: 22px; box-shadow: 0 30px 80px rgba(15, 23, 42, .35); }
+        .modal-header { border-bottom: none; padding: 24px 26px 0; }
+        .modal-header .modal-title { font-weight: 800; letter-spacing: -.2px; }
+        .modal-body { padding: 20px 26px; }
+        .modal-footer { border-top: 1px solid var(--line); padding: 16px 26px; }
+        .modal-backdrop.show { opacity: .45; }
+
+        .badge-met, .badge { border-radius: 999px; font-weight: 700; letter-spacing: .2px; }
+        .badge-met { font-size: .73rem; padding: 5px 11px; }
+        .mov-in { color: #10b981; font-weight: 800; }
+        .mov-out { color: #ef4444; font-weight: 800; }
+
+        .list-group-flush .list-group-item { padding-left: 0; padding-right: 0; background: transparent; border-color: var(--line); }
+
+        #liveToast { border-radius: 14px; box-shadow: 0 20px 50px rgba(15, 23, 42, .3); font-weight: 600; }
+
+        #printArea { display: none; }
+        .ticket { width: 320px; font-family: 'Courier New', monospace; font-size: 12px; color: #000; margin: 0 auto; }
+        .ticket h4 { font-size: 15px; font-weight: 700; text-align: center; margin: 2px 0; }
+        .ticket .tc { text-align: center; }
+        .ticket table { width: 100%; border-collapse: collapse; font-size: 11.5px; }
+        .ticket table th, .ticket table td { border-bottom: 1px dashed #888; padding: 2px 3px; }
+        .ticket .tt { font-size: 14px; font-weight: 700; text-align: center; border: 2px solid #000; padding: 3px; margin: 6px 0; }
+        .ticket .total { font-size: 16px; font-weight: 700; }
+        @media print {
+            body * { visibility: hidden; }
+            #printArea, #printArea * { visibility: visible; }
+            #printArea { display: block !important; position: absolute; left: 0; top: 0; width: 100%; }
+            .sidebar, .main-content, .modal { display: none !important; }
+        }
+
+        @media (max-width: 768px) {
+            .sidebar { width: 82px; padding: 18px 8px; }
+            .sidebar .brand { justify-content: center; padding-bottom: 16px; }
+            .sidebar .brand-text, .sidebar .nav-item span, .nav-label { display: none; }
+            .sidebar .nav-item { justify-content: center; padding: 13px 0; margin: 3px 6px; }
+            .sidebar .nav-item i { font-size: 1.15rem; }
+            .main-content { margin-left: 82px; padding: 16px; }
+            .stat-card .value { font-size: 1.15rem; }
+            .stat-icon { width: 44px; height: 44px; font-size: 1.05rem; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="sidebar">
+    <div class="brand">
+        <div class="brand-icon"><i class="fas fa-hard-hat"></i></div>
+        <div class="brand-text"><b>Corralón</b><small>Gestión Total Pro</small></div>
+    </div>
+    <div class="nav-item active" data-page="dashboard"><i class="fas fa-chart-pie"></i> <span>Dashboard</span></div>
+    <div class="nav-item" data-page="sales"><i class="fas fa-cash-register"></i> <span>Ventas</span></div>
+    <div class="nav-item" data-page="quotes"><i class="fas fa-file-invoice-dollar"></i> <span>Presupuestos</span></div>
+    <div class="nav-item" data-page="purchases"><i class="fas fa-cart-plus"></i> <span>Compras</span></div>
+    <div class="nav-label">Inventario</div>
+    <div class="nav-item" data-page="products"><i class="fas fa-cubes"></i> <span>Productos</span></div>
+    <div class="nav-item" data-page="stock"><i class="fas fa-boxes-stacked"></i> <span>Stock</span></div>
+    <div class="nav-label">Personas</div>
+    <div class="nav-item" data-page="clients"><i class="fas fa-users"></i> <span>Clientes</span></div>
+    <div class="nav-item" data-page="suppliers"><i class="fas fa-truck"></i> <span>Proveedores</span></div>
+    <div class="nav-label">Administración</div>
+    <div class="nav-item" data-page="caja"><i class="fas fa-coins"></i> <span>Caja</span></div>
+    <div class="nav-item" data-page="reports"><i class="fas fa-file-alt"></i> <span>Reportes</span></div>
+    <div class="nav-item" data-page="config"><i class="fas fa-gear"></i> <span>Configuración</span></div>
+</div>
+
+<div class="main-content">
+
+    <div class="topbar">
+        <div class="tb-title">
+            <h1><i class="fas fa-hard-hat"></i>Sistema Corralón Pro</h1>
+            <p>Control total de ventas, stock y finanzas de tu negocio</p>
+        </div>
+        <div class="tb-date"><i class="fas fa-calendar-day"></i><span id="tbDate">—</span></div>
+    </div>
+
+    <div id="page-dashboard" class="page active">
+        <h2 class="mb-4"><i class="fas fa-chart-line text-primary me-2"></i>Panel de Control</h2>
+        <div class="row g-4 mb-4" id="dashboard-cards"></div>
+        <div class="row">
+            <div class="col-lg-8">
+                <div class="panel">
+                    <h5 class="mb-3"><i class="fas fa-chart-column text-primary me-2"></i>Ventas - Últimos 14 días</h5>
+                    <canvas id="salesChart" height="110"></canvas>
+                </div>
+            </div>
+            <div class="col-lg-4">
+                <div class="panel">
+                    <h5 class="mb-3"><i class="fas fa-chart-pie text-primary me-2"></i>Formas de Pago (30 días)</h5>
+                    <canvas id="payChart" height="200"></canvas>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-lg-4">
+                <div class="panel">
+                    <h5 class="mb-3"><i class="fas fa-triangle-exclamation text-warning me-2"></i>Stock Bajo</h5>
+                    <div id="dashboard-low-stock"></div>
+                </div>
+            </div>
+            <div class="col-lg-4">
+                <div class="panel">
+                    <h5 class="mb-3"><i class="fas fa-crown text-warning me-2"></i>Productos Más Vendidos</h5>
+                    <div id="dashboard-top-products"></div>
+                </div>
+            </div>
+            <div class="col-lg-4">
+                <div class="panel">
+                    <h5 class="mb-3"><i class="fas fa-clock me-2"></i>Últimas Ventas</h5>
+                    <div id="dashboard-recent-sales"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="page-sales" class="page">
+        <h2 class="mb-4"><i class="fas fa-cash-register text-primary me-2"></i>Registrar Venta</h2>
+        <div class="panel">
+            <div class="row g-3 mb-3">
+                <div class="col-md-3">
+                    <label class="form-label fw-bold">Cliente</label>
+                    <select id="saleClient" class="form-select" onchange="updateSaleClient()"></select>
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label fw-bold">Comprobante</label>
+                    <select id="saleInvoiceType" class="form-select">
+                        <option value="Ticket">Ticket</option>
+                        <option value="Factura C">Factura C</option>
+                        <option value="Factura B">Factura B</option>
+                        <option value="Factura A">Factura A</option>
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label fw-bold">Forma de Pago</label>
+                    <select id="saleMethod" class="form-select" onchange="toggleMixto()">
+                        <option value="efectivo">Efectivo</option>
+                        <option value="tarjeta">Tarjeta</option>
+                        <option value="transferencia">Transferencia</option>
+                        <option value="cuenta">Cuenta Corriente</option>
+                        <option value="mixto">Mixto (Efectivo + Cuenta)</option>
+                    </select>
+                </div>
+                <div class="col-md-2" id="mixtoWrap" style="display:none;">
+                    <label class="form-label fw-bold">Monto Efectivo</label>
+                    <input type="number" step="0.01" min="0" class="form-control" id="saleCashAmount" value="0" oninput="renderSaleItems()">
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label fw-bold">Vendedor</label>
+                    <select id="saleSeller" class="form-select"></select>
+                </div>
+            </div>
+            <div class="row g-3 mb-3 align-items-center">
+                <div class="col-auto">
+                    <button class="btn btn-success btn-lg" onclick="addSaleRow()"><i class="fas fa-plus me-2"></i>Agregar Producto</button>
+                </div>
+                <div class="col-auto">
+                    <div class="form-check form-switch mt-3">
+                        <input class="form-check-input" type="checkbox" id="saleWholeToggle" onchange="renderSaleItems()">
+                        <label class="form-check-label" for="saleWholeToggle"><strong>Precio Mayorista</strong></label>
+                    </div>
+                </div>
+                <div class="col-auto">
+                    <label class="form-label fw-bold">Descuento %</label>
+                    <input type="number" step="0.1" min="0" max="100" class="form-control" id="saleDiscount" value="0" oninput="renderSaleItems()" style="width:100px;">
+                </div>
+            </div>
+            <div id="saleItemsContainer"></div>
+            <div class="row mt-3">
+                <div class="col-md-5 offset-md-7">
+                    <div class="totals">
+                        <h4>Subtotal: <span id="saleSubtotal" class="text-dark">$0.00</span></h4>
+                        <h4>Total: <span id="saleTotal" class="text-success">$0.00</span></h4>
+                        <button class="btn btn-primary-custom w-100 mt-2 btn-lg" onclick="saveSale()"><i class="fas fa-check me-2"></i>Finalizar Venta</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="panel">
+            <h4 class="mt-2 mb-3"><i class="fas fa-history me-2"></i>Historial de Ventas</h4>
+            <input type="text" class="form-control mb-3" id="salesHistorySearch" placeholder="Buscar por cliente, número o producto..." oninput="renderSalesHistory()">
+            <div id="salesHistoryContainer"></div>
+        </div>
+    </div>
+
+    <div id="page-quotes" class="page">
+        <h2 class="mb-4"><i class="fas fa-file-invoice-dollar text-primary me-2"></i>Presupuestos</h2>
+        <div class="panel">
+            <div class="row g-3 mb-3">
+                <div class="col-md-4">
+                    <label class="form-label fw-bold">Cliente</label>
+                    <select id="quoteClient" class="form-select"></select>
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label fw-bold">Válido hasta</label>
+                    <input type="date" class="form-control" id="quoteValidUntil">
+                </div>
+                <div class="col-md-4 text-end">
+                    <button class="btn btn-success btn-lg" onclick="addQuoteRow()"><i class="fas fa-plus me-2"></i>Agregar Producto</button>
+                </div>
+            </div>
+            <div id="quoteItemsContainer"></div>
+            <div class="row mt-3">
+                <div class="col-md-5 offset-md-7">
+                    <div class="totals">
+                        <h4>Total: <span id="quoteTotal" class="text-primary">$0.00</span></h4>
+                        <button class="btn btn-primary-custom w-100 mt-2 btn-lg" onclick="saveQuote()"><i class="fas fa-save me-2"></i>Guardar Presupuesto</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="panel">
+            <h4 class="mt-2 mb-3"><i class="fas fa-list me-2"></i>Lista de Presupuestos</h4>
+            <div id="quotesListContainer"></div>
+        </div>
+    </div>
+
+    <div id="page-purchases" class="page">
+        <h2 class="mb-4"><i class="fas fa-cart-plus text-primary me-2"></i>Registrar Compra</h2>
+        <div class="panel">
+            <div class="row g-3 mb-3">
+                <div class="col-md-4">
+                    <label class="form-label fw-bold">Proveedor</label>
+                    <select id="purchaseSupplier" class="form-select"></select>
+                </div>
+                <div class="col-md-8 text-end">
+                    <button class="btn btn-success btn-lg" onclick="addPurchaseRow()"><i class="fas fa-plus me-2"></i>Agregar Producto</button>
+                </div>
+            </div>
+            <div id="purchaseItemsContainer"></div>
+            <div class="row mt-3">
+                <div class="col-md-5 offset-md-7">
+                    <div class="totals">
+                        <h4>Total: <span id="purchaseTotal" class="text-danger">$0.00</span></h4>
+                        <button class="btn btn-primary-custom w-100 mt-2 btn-lg" onclick="savePurchase()"><i class="fas fa-check me-2"></i>Finalizar Compra</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="panel">
+            <h4 class="mt-2 mb-3"><i class="fas fa-history me-2"></i>Historial de Compras</h4>
+            <div id="purchasesHistoryContainer"></div>
+        </div>
+    </div>
+
+    <div id="page-products" class="page">
+        <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+            <h2><i class="fas fa-cubes text-primary me-2"></i>Productos</h2>
+            <button class="btn btn-primary-custom btn-lg" onclick="openProductModal()"><i class="fas fa-plus me-2"></i>Nuevo Producto</button>
+        </div>
+        <div class="panel">
+            <input type="text" class="form-control mb-3" id="productSearch" placeholder="Buscar por nombre, categoría o código de barras..." oninput="renderProducts()">
+            <div id="productTableContainer"></div>
+        </div>
+    </div>
+
+    <div id="page-stock" class="page">
+        <h2 class="mb-4"><i class="fas fa-boxes-stacked text-primary me-2"></i>Movimientos de Stock</h2>
+        <div class="row">
+            <div class="col-lg-4">
+                <div class="panel">
+                    <h5 class="mb-3"><i class="fas fa-sliders me-2"></i>Ajuste de Stock</h5>
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Producto</label>
+                        <select id="adjustProduct" class="form-select"></select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Tipo</label>
+                        <select id="adjustType" class="form-select">
+                            <option value="entrada">Entrada (sumar)</option>
+                            <option value="salida">Salida (restar)</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Cantidad</label>
+                        <input type="number" class="form-control" id="adjustQty" value="1" min="0.01">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Motivo</label>
+                        <select id="adjustReason" class="form-select">
+                            <option value="Inventario físico">Inventario físico</option>
+                            <option value="Rotura / Merma">Rotura / Merma</option>
+                            <option value="Corrección de carga">Corrección de carga</option>
+                            <option value="Préstamo interno">Préstamo interno</option>
+                            <option value="Devolución">Devolución</option>
+                        </select>
+                    </div>
+                    <button class="btn btn-primary-custom w-100 btn-lg" onclick="saveAdjust()"><i class="fas fa-check me-2"></i>Aplicar Ajuste</button>
+                </div>
+            </div>
+            <div class="col-lg-8">
+                <div class="panel">
+                    <h5 class="mb-3"><i class="fas fa-list me-2"></i>Últimos Movimientos</h5>
+                    <select id="movFilter" class="form-select mb-3" onchange="renderMovements()">
+                        <option value="">Todos los productos</option>
+                    </select>
+                    <div id="movementsContainer"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="page-clients" class="page">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2><i class="fas fa-users text-primary me-2"></i>Clientes</h2>
+            <button class="btn btn-primary-custom btn-lg" onclick="openClientModal()"><i class="fas fa-plus me-2"></i>Nuevo Cliente</button>
+        </div>
+        <div class="panel">
+            <input type="text" class="form-control mb-3" id="clientSearch" placeholder="Buscar cliente..." oninput="renderClients()">
+            <div id="clientTableContainer"></div>
+        </div>
+    </div>
+
+    <div id="page-suppliers" class="page">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2><i class="fas fa-truck text-primary me-2"></i>Proveedores</h2>
+            <button class="btn btn-primary-custom btn-lg" onclick="openSupplierModal()"><i class="fas fa-plus me-2"></i>Nuevo Proveedor</button>
+        </div>
+        <div class="panel">
+            <div id="supplierTableContainer"></div>
+        </div>
+    </div>
+
+    <div id="page-caja" class="page">
+        <h2 class="mb-4"><i class="fas fa-coins text-primary me-2"></i>Caja</h2>
+        <div class="row">
+            <div class="col-lg-5">
+                <div class="panel" id="cajaStatusCard"></div>
+            </div>
+            <div class="col-lg-7">
+                <div class="panel">
+                    <h5 class="mb-3"><i class="fas fa-list me-2"></i>Movimientos de Caja</h5>
+                    <div class="row g-2 mb-3">
+                        <div class="col-6">
+                            <input type="date" class="form-control" id="cajaFilterFrom" onchange="renderCajaMovements()">
+                        </div>
+                        <div class="col-6">
+                            <input type="date" class="form-control" id="cajaFilterTo" onchange="renderCajaMovements()">
+                        </div>
+                    </div>
+                    <div id="cajaMovementsContainer"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="page-reports" class="page">
+        <h2 class="mb-4"><i class="fas fa-file-alt text-primary me-2"></i>Reportes</h2>
+        <div class="panel">
+            <div class="row g-3 align-items-end">
+                <div class="col-md-4">
+                    <label class="form-label fw-bold">Desde</label>
+                    <input type="date" class="form-control" id="repFrom">
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label fw-bold">Hasta</label>
+                    <input type="date" class="form-control" id="repTo">
+                </div>
+                <div class="col-md-4">
+                    <button class="btn btn-primary-custom w-100 btn-lg" onclick="applyReportFilter()"><i class="fas fa-filter me-2"></i>Aplicar Filtro</button>
+                </div>
+            </div>
+        </div>
+        <div class="row g-4 mt-1 mb-2" id="reportSummary"></div>
+        <div class="panel">
+            <div class="d-flex justify-content-between align-items-center">
+                <h5 class="mb-0"><i class="fas fa-users text-primary me-2"></i>Ventas por Vendedor</h5>
+            </div>
+            <div id="reportSellers" class="mt-3"></div>
+        </div>
+        <div class="panel">
+            <h5 class="mb-0"><i class="fas fa-wallet text-primary me-2"></i>Ventas por Forma de Pago</h5>
+            <div id="reportMethods" class="mt-3"></div>
+        </div>
+        <div class="row">
+            <div class="col-lg-6">
+                <div class="panel">
+                    <h5 class="mb-0"><i class="fas fa-crown text-warning me-2"></i>Top Productos</h5>
+                    <div id="reportTopProducts" class="mt-3"></div>
+                </div>
+            </div>
+            <div class="col-lg-6">
+                <div class="panel">
+                    <h5 class="mb-0"><i class="fas fa-trophy text-warning me-2"></i>Top Clientes</h5>
+                    <div id="reportTopClients" class="mt-3"></div>
+                </div>
+            </div>
+        </div>
+        <div class="panel">
+            <div class="d-flex justify-content-between align-items-center">
+                <h5 class="mb-0"><i class="fas fa-history me-2"></i>Ventas del Período</h5>
+                <button class="btn btn-outline-success" onclick="exportSalesCSV()"><i class="fas fa-file-csv me-2"></i>Exportar CSV</button>
+            </div>
+            <div id="reportSalesHistory" class="mt-3"></div>
+        </div>
+    </div>
+
+    <div id="page-config" class="page">
+        <h2 class="mb-4"><i class="fas fa-gear text-primary me-2"></i>Configuración</h2>
+        <div class="row">
+            <div class="col-lg-6">
+                <div class="panel">
+                    <h5 class="mb-3"><i class="fas fa-building me-2"></i>Datos de la Empresa</h5>
+                    <div class="mb-3"><label class="form-label fw-bold">Nombre</label><input class="form-control" id="cfName"></div>
+                    <div class="mb-3"><label class="form-label fw-bold">CUIT</label><input class="form-control" id="cfCuit"></div>
+                    <div class="mb-3"><label class="form-label fw-bold">Dirección</label><input class="form-control" id="cfAddress"></div>
+                    <div class="mb-3"><label class="form-label fw-bold">Teléfono</label><input class="form-control" id="cfPhone"></div>
+                    <button class="btn btn-primary-custom" onclick="saveCompany()"><i class="fas fa-save me-2"></i>Guardar</button>
+                </div>
+                <div class="panel">
+                    <h5 class="mb-3"><i class="fas fa-hashtag me-2"></i>Numeración de Comprobantes</h5>
+                    <div class="row g-3">
+                        <div class="col-md-4"><label class="form-label fw-bold">Próx. Venta</label><input type="number" class="form-control" id="cfNextNum"></div>
+                        <div class="col-md-4"><label class="form-label fw-bold">Próx. Presupuesto</label><input type="number" class="form-control" id="cfNextQuote"></div>
+                        <div class="col-md-4"><label class="form-label fw-bold">Próx. Recibo</label><input type="number" class="form-control" id="cfNextRecibo"></div>
+                    </div>
+                    <button class="btn btn-primary-custom mt-3" onclick="saveNumbers()"><i class="fas fa-save me-2"></i>Guardar Numeración</button>
+                </div>
+            </div>
+            <div class="col-lg-6">
+                <div class="panel">
+                    <h5 class="mb-3"><i class="fas fa-user-tie me-2"></i>Vendedores</h5>
+                    <div class="row g-2 mb-3">
+                        <div class="col-md-6"><input class="form-control" id="sellerName" placeholder="Nombre del vendedor"></div>
+                        <div class="col-md-4"><input type="number" step="0.1" min="0" class="form-control" id="sellerCommission" placeholder="Comisión %"></div>
+                        <div class="col-md-2"><button class="btn btn-success w-100" onclick="addSeller()"><i class="fas fa-plus"></i></button></div>
+                    </div>
+                    <div id="sellersContainer"></div>
+                </div>
+                <div class="panel">
+                    <h5 class="mb-3"><i class="fas fa-database me-2"></i>Datos y Respaldo</h5>
+                    <div class="d-grid gap-2">
+                        <button class="btn btn-outline-primary" onclick="exportBackup()"><i class="fas fa-download me-2"></i>Exportar Respaldo Completo (JSON)</button>
+                        <label class="btn btn-outline-secondary w-100">
+                            <i class="fas fa-upload me-2"></i>Importar Respaldo
+                            <input type="file" accept=".json" class="d-none" onchange="importBackup(event)">
+                        </label>
+                        <button class="btn btn-outline-success" onclick="exportProductsCSV()"><i class="fas fa-file-csv me-2"></i>Exportar Productos (CSV)</button>
+                        <button class="btn btn-outline-success" onclick="exportSalesCSV()"><i class="fas fa-file-csv me-2"></i>Exportar Ventas (CSV)</button>
+                        <button class="btn btn-outline-danger" onclick="wipeData()"><i class="fas fa-trash me-2"></i>Borrar Todos los Datos</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="productModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header"><h5 class="modal-title" id="productModalTitle">Nuevo Producto</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
+            <div class="modal-body">
+                <input type="hidden" id="productId">
+                <div class="row g-3">
+                    <div class="col-md-4"><label class="form-label fw-bold">Código / Barras</label><input class="form-control" id="pCode" placeholder="Ej: 7790000000001"></div>
+                    <div class="col-md-8"><label class="form-label fw-bold">Nombre *</label><input class="form-control" id="pName" placeholder="Ej: Cemento Portland"></div>
+                    <div class="col-md-4"><label class="form-label fw-bold">Categoría</label><input class="form-control" id="pCategory" placeholder="Ej: Hormigón"></div>
+                    <div class="col-md-4"><label class="form-label fw-bold">Unidad *</label><input class="form-control" id="pUnit" placeholder="Kg, Bolsa, Unidad"></div>
+                    <div class="col-md-4"><label class="form-label fw-bold">IVA %</label><input type="number" step="0.5" class="form-control" id="pIva" value="21"></div>
+                    <div class="col-md-4"><label class="form-label fw-bold">Stock *</label><input type="number" step="0.01" class="form-control" id="pStock" value="0"></div>
+                    <div class="col-md-4"><label class="form-label fw-bold">Stock Mínimo *</label><input type="number" step="0.01" class="form-control" id="pMinStock" value="5"></div>
+                    <div class="col-md-4"><label class="form-label fw-bold">Precio Compra *</label><input type="number" step="0.01" class="form-control" id="pBuyPrice" value="0"></div>
+                    <div class="col-md-6"><label class="form-label fw-bold">Precio Venta *</label><input type="number" step="0.01" class="form-control" id="pSellPrice" value="0"></div>
+                    <div class="col-md-6"><label class="form-label fw-bold">Precio Mayorista</label><input type="number" step="0.01" class="form-control" id="pWholePrice" value="0"></div>
+                </div>
+            </div>
+            <div class="modal-footer"><button class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button><button class="btn btn-primary-custom" onclick="saveProduct()">Guardar</button></div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="clientModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header"><h5 class="modal-title">Nuevo Cliente</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
+            <div class="modal-body">
+                <input type="hidden" id="clientId">
+                <div class="mb-3"><label class="form-label fw-bold">Nombre *</label><input class="form-control" id="cName"></div>
+                <div class="mb-3"><label class="form-label fw-bold">DNI / CUIT</label><input class="form-control" id="cDoc" placeholder="Ej: 20-12345678-9"></div>
+                <div class="mb-3">
+                    <label class="form-label fw-bold">Condición Fiscal</label>
+                    <select class="form-select" id="cCondition">
+                        <option value="consumidor">Consumidor Final</option>
+                        <option value="monotributo">Monotributista</option>
+                        <option value="respin">Responsable Inscripto</option>
+                    </select>
+                </div>
+                <div class="mb-3"><label class="form-label fw-bold">Teléfono</label><input class="form-control" id="cPhone"></div>
+                <div class="mb-3"><label class="form-label fw-bold">Email</label><input class="form-control" id="cEmail"></div>
+                <div class="mb-3"><label class="form-label fw-bold">Dirección</label><input class="form-control" id="cAddress"></div>
+            </div>
+            <div class="modal-footer"><button class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button><button class="btn btn-primary-custom" onclick="saveClient()">Guardar</button></div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="supplierModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header"><h5 class="modal-title">Nuevo Proveedor</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
+            <div class="modal-body">
+                <input type="hidden" id="supplierId">
+                <div class="mb-3"><label class="form-label fw-bold">Nombre *</label><input class="form-control" id="sName"></div>
+                <div class="mb-3"><label class="form-label fw-bold">Teléfono</label><input class="form-control" id="sPhone"></div>
+                <div class="mb-3"><label class="form-label fw-bold">Email</label><input class="form-control" id="sEmail"></div>
+                <div class="mb-3"><label class="form-label fw-bold">Dirección</label><input class="form-control" id="sAddress"></div>
+            </div>
+            <div class="modal-footer"><button class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button><button class="btn btn-primary-custom" onclick="saveSupplier()">Guardar</button></div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="clientDetailModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title"><i class="fas fa-user me-2"></i><span id="cdName"></span></h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="row g-3 mb-3" id="cdInfo"></div>
+                <h6 class="fw-bold"><i class="fas fa-file-invoice me-2"></i>Deudas (Ventas a Cuenta Corriente)</h6>
+                <div id="cdDebts" class="mt-2"></div>
+                <h6 class="fw-bold mt-4"><i class="fas fa-receipt me-2"></i>Recibos de Cobro</h6>
+                <div id="cdPayments" class="mt-2"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="payModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header"><h5 class="modal-title"><i class="fas fa-hand-holding-dollar me-2"></i>Registrar Cobro</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
+            <div class="modal-body">
+                <input type="hidden" id="paySaleId">
+                <div class="mb-3"><label class="form-label fw-bold">Monto</label><input type="number" step="0.01" min="0.01" class="form-control" id="payAmount"></div>
+                <div class="mb-3">
+                    <label class="form-label fw-bold">Forma de Pago</label>
+                    <select class="form-select" id="payMethod">
+                        <option value="efectivo">Efectivo</option>
+                        <option value="tarjeta">Tarjeta</option>
+                        <option value="transferencia">Transferencia</option>
+                    </select>
+                </div>
+                <div class="mb-3"><label class="form-label fw-bold">Nota</label><input class="form-control" id="payNote" placeholder="Ej: Pago parcial, seña..."></div>
+            </div>
+            <div class="modal-footer"><button class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button><button class="btn btn-primary-custom" onclick="savePayment()">Registrar Recibo</button></div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="cajaModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header"><h5 class="modal-title" id="cajaModalTitle">Movimiento de Caja</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
+            <div class="modal-body">
+                <input type="hidden" id="cajaModalType">
+                <div class="mb-3"><label class="form-label fw-bold">Monto</label><input type="number" step="0.01" min="0.01" class="form-control" id="cajaAmount"></div>
+                <div class="mb-3" id="cajaCatWrap">
+                    <label class="form-label fw-bold">Categoría</label>
+                    <select class="form-select" id="cajaCategory">
+                        <option value="Alquiler">Alquiler</option>
+                        <option value="Servicios">Servicios</option>
+                        <option value="Sueldos">Sueldos</option>
+                        <option value="Fletes">Fletes</option>
+                        <option value="Mantenimiento">Mantenimiento</option>
+                        <option value="Otros">Otros</option>
+                    </select>
+                </div>
+                <div class="mb-3"><label class="form-label fw-bold">Descripción</label><input class="form-control" id="cajaDesc"></div>
+            </div>
+            <div class="modal-footer"><button class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button><button class="btn btn-primary-custom" onclick="saveCajaMovement()">Guardar</button></div>
+        </div>
+    </div>
+</div>
+
+<div class="position-fixed bottom-0 end-0 p-3" style="z-index: 9999">
+    <div id="liveToast" class="toast align-items-center text-white border-0" role="alert" aria-live="assertive" aria-atomic="true">
+        <div class="d-flex"><div class="toast-body" id="toastMessage"></div><button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button></div>
+    </div>
+</div>
+
+<div id="printArea"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    const DB = {
+        get(key) { try { return JSON.parse(localStorage.getItem(key)) || []; } catch (e) { return []; } },
+        set(key, data) { localStorage.setItem(key, JSON.stringify(data)); }
+    };
+
+    function uid() { return Date.now().toString(36) + Math.random().toString(36).substr(2, 6); }
+    function fmt(n) { return '$' + Number(n || 0).toLocaleString('es-AR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }); }
+    function fmtDate(iso) { return new Date(iso).toLocaleString('es-AR', { dateStyle: 'short', timeStyle: 'short' }); }
+    function todayKey() { return new Date().toISOString().slice(0, 10); }
+    function monthKey() { return new Date().toISOString().slice(0, 7); }
+
+    const K = {
+        products: 'corralon_products', clients: 'corralon_clients', suppliers: 'corralon_suppliers',
+        sales: 'corralon_sales', purchases: 'corralon_purchases', quotes: 'corralon_quotes',
+        payments: 'corralon_payments', caja: 'corralon_caja', movements: 'corralon_stock_movs',
+        sellers: 'corralon_sellers', settings: 'corralon_settings'
+    };
+
+    function getProducts() { return DB.get(K.products); }
+    function setProducts(p) { DB.set(K.products, p); }
+    function getClients() { return DB.get(K.clients); }
+    function setClients(c) { DB.set(K.clients, c); }
+    function getSuppliers() { return DB.get(K.suppliers); }
+    function setSuppliers(s) { DB.set(K.suppliers, s); }
+    function getSales() { return DB.get(K.sales); }
+    function setSales(s) { DB.set(K.sales, s); }
+    function getPurchases() { return DB.get(K.purchases); }
+    function setPurchases(p) { DB.set(K.purchases, p); }
+    function getQuotes() { return DB.get(K.quotes); }
+    function setQuotes(q) { DB.set(K.quotes, q); }
+    function getPayments() { return DB.get(K.payments); }
+    function setPayments(p) { DB.set(K.payments, p); }
+    function getCaja() {
+        const c = DB.get(K.caja);
+        if (!c || !c.movements) return { status: 'cerrada', openedAt: null, closedAt: null, movements: [], lastArqueo: null };
+        return c;
+    }
+    function setCaja(c) { DB.set(K.caja, c); }
+    function getMovements() { return DB.get(K.movements); }
+    function setMovements(m) { DB.set(K.movements, m); }
+    function getSellers() { return DB.get(K.sellers); }
+    function setSellers(s) { DB.set(K.sellers, s); }
+
+    function loadSettings() {
+        const d = { empresa: { nombre: 'Mi Corralón', cuit: '', direccion: '', telefono: '' }, nextNum: 1, nextQuote: 1, nextRecibo: 1 };
+        const s = JSON.parse(localStorage.getItem(K.settings) || '{}');
+        return { ...d, ...s, empresa: { ...d.empresa, ...(s.empresa || {}) } };
+    }
+    function saveSettings(s) { localStorage.setItem(K.settings, JSON.stringify(s)); }
+
+    function nextNum() { const s = loadSettings(); const n = s.nextNum; s.nextNum++; saveSettings(s); return String(n).padStart(8, '0'); }
+    function nextQuoteNum() { const s = loadSettings(); const n = s.nextQuote; s.nextQuote++; saveSettings(s); return String(n).padStart(6, '0'); }
+    function nextReciboNum() { const s = loadSettings(); const n = s.nextRecibo; s.nextRecibo++; saveSettings(s); return 'R-' + String(n).padStart(6, '0'); }
+
+    if (getProducts().length === 0) {
+        setProducts([
+            { id: 'p1', code: '7790000000011', name: 'Cemento Portland 50kg', category: 'Hormigón', unit: 'Bolsa', stock: 150, minStock: 20, buyPrice: 4.5, sellPrice: 7.0, wholePrice: 6.2, iva: 21 },
+            { id: 'p2', code: '7790000000028', name: 'Ladrillo Hueco 12x18x33', category: 'Mampostería', unit: 'Unidad', stock: 800, minStock: 100, buyPrice: 0.35, sellPrice: 0.6, wholePrice: 0.5, iva: 21 },
+            { id: 'p3', code: '7790000000035', name: 'Hierro 12mm x 6m', category: 'Metales', unit: 'Barra', stock: 45, minStock: 10, buyPrice: 12.0, sellPrice: 18.5, wholePrice: 16.8, iva: 21 },
+            { id: 'p4', code: '7790000000042', name: 'Arena Fina', category: 'Áridos', unit: 'm³', stock: 12, minStock: 5, buyPrice: 25.0, sellPrice: 40.0, wholePrice: 35.0, iva: 21 },
+        ]);
+    }
+    if (getClients().length === 0) {
+        setClients([
+            { id: 'c1', name: 'Juan Pérez', doc: '20-12345678-9', condition: 'monotributo', phone: '123456789', email: 'juan@mail.com', address: 'Calle 123' },
+            { id: 'c2', name: 'María Gómez', doc: '', condition: 'consumidor', phone: '987654321', email: 'maria@mail.com', address: 'Av. Siempre Viva 742' },
+        ]);
+    }
+    if (getSuppliers().length === 0) {
+        setSuppliers([
+            { id: 's1', name: 'Materias Primas SA', phone: '111222333', email: 'ventas@mpsa.com', address: 'Zona Industrial' },
+            { id: 's2', name: 'Distribuidora del Oeste', phone: '444555666', email: 'info@doeste.com', address: 'Ruta 8 km 12' },
+        ]);
+    }
+    if (getSellers().length === 0) {
+        setSellers([
+            { id: 'v1', name: 'Carlos Ríos', commission: 2 },
+            { id: 'v2', name: 'Lucía Fernández', commission: 3 },
+        ]);
+    }
+
+    document.querySelectorAll('.sidebar .nav-item').forEach(item => {
+        item.addEventListener('click', function () {
+            document.querySelectorAll('.sidebar .nav-item').forEach(i => i.classList.remove('active'));
+            this.classList.add('active');
+            const page = this.dataset.page;
+            document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+            document.getElementById('page-' + page).classList.add('active');
+            const renderers = {
+                dashboard: renderDashboard, sales: renderSalesView, quotes: renderQuotesView,
+                purchases: renderPurchasesView, products: renderProducts, stock: renderStock,
+                clients: renderClients, suppliers: renderSuppliers, caja: renderCaja,
+                reports: renderReports, config: renderConfig
+            };
+            if (renderers[page]) renderers[page]();
+        });
+    });
+
+    function showToast(msg, bg) {
+        bg = bg || 'bg-success';
+        document.getElementById('toastMessage').textContent = msg;
+        const toast = document.getElementById('liveToast');
+        toast.className = 'toast align-items-center text-white border-0 ' + bg;
+        new bootstrap.Toast(toast).show();
+    }
+
+    function populateSelect(id, data, labelFn, defaultText) {
+        const sel = document.getElementById(id);
+        if (!sel) return;
+        sel.innerHTML = `<option value="">${defaultText || 'Seleccionar...'}</option>` + data.map(it => `<option value="${it.id}">${labelFn(it)}</option>`).join('');
+    }
+
+    function addStockMovement(productId, productName, type, qty, note) {
+        const movs = getMovements();
+        movs.push({ id: uid(), date: new Date().toISOString(), productId, productName, type, qty: parseFloat(qty) || 0, note: note || '' });
+        setMovements(movs.slice(-500));
+    }
+
+    function clientBalance(clientId) {
+        return getSales().filter(s => s.clientId === clientId).reduce((acc, s) => acc + (s.remaining || 0), 0);
+    }
+
+    function cashBalance() {
+        return getCaja().movements.reduce((acc, m) => acc + (parseFloat(m.amount) || 0), 0);
+    }
+
+    let chartSales = null, chartPay = null;
+
+    function renderDashboard() {
+        const products = getProducts(), clients = getClients(), sales = getSales();
+        const today = todayKey(), month = monthKey();
+        const lowStock = products.filter(p => p.stock <= p.minStock);
+        const salesToday = sales.filter(s => s.date.slice(0, 10) === today);
+        const salesMonth = sales.filter(s => s.date.slice(0, 7) === month);
+        const profitMonth = salesMonth.reduce((a, s) => a + (s.profit || 0), 0);
+        const toCollect = sales.reduce((a, s) => a + (s.remaining || 0), 0);
+        const monthSalesTotal = salesMonth.reduce((a, s) => a + s.total, 0);
+        const caja = getCaja().status === 'abierta' ? cashBalance() : 0;
+
+        document.getElementById('dashboard-cards').innerHTML = `
+            <div class="col-md-4"><div class="stat-card" data-c="blue"><div class="stat-icon"><i class="fas fa-dollar-sign"></i></div><div class="stat-body"><div class="label">Ventas Hoy</div><div class="value">${fmt(salesToday.reduce((a, s) => a + s.total, 0))}</div></div></div></div>
+            <div class="col-md-4"><div class="stat-card" data-c="indigo"><div class="stat-icon"><i class="fas fa-calendar-check"></i></div><div class="stat-body"><div class="label">Ventas del Mes</div><div class="value">${fmt(monthSalesTotal)}</div></div></div></div>
+            <div class="col-md-4"><div class="stat-card" data-c="green"><div class="stat-icon"><i class="fas fa-chart-line"></i></div><div class="stat-body"><div class="label">Ganancia del Mes</div><div class="value">${fmt(profitMonth)}</div></div></div></div>
+            <div class="col-md-4"><div class="stat-card" data-c="orange"><div class="stat-icon"><i class="fas fa-hand-holding-dollar"></i></div><div class="stat-body"><div class="label">A Cobrar (Cta. Cte.)</div><div class="value ${toCollect > 0 ? 'text-danger' : ''}">${fmt(toCollect)}</div></div></div></div>
+            <div class="col-md-4"><div class="stat-card" data-c="purple"><div class="stat-icon"><i class="fas fa-coins"></i></div><div class="stat-body"><div class="label">Caja Actual</div><div class="value">${fmt(caja)}</div></div></div></div>
+            <div class="col-md-4"><div class="stat-card" data-c="red"><div class="stat-icon"><i class="fas fa-cubes"></i></div><div class="stat-body"><div class="label">Stock Bajo / Productos</div><div class="value"><span class="${lowStock.length ? 'text-danger' : ''}">${lowStock.length}</span> / ${products.length}</div></div></div></div>
+        `;
+
+        let lowHtml = `<table class="table table-sm"><thead><tr><th>Producto</th><th>Stock</th><th>Mín.</th></tr></thead><tbody>`;
+        lowStock.slice(0, 6).forEach(p => { lowHtml += `<tr><td>${p.name}</td><td class="text-danger fw-bold">${p.stock}</td><td>${p.minStock}</td></tr>`; });
+        lowHtml += `</tbody></table>`;
+        document.getElementById('dashboard-low-stock').innerHTML = lowStock.length === 0 ? '<p class="text-muted mb-0">Sin productos con stock bajo</p>' : lowHtml;
+
+        const byProduct = {};
+        sales.forEach(s => (s.items || []).forEach(it => {
+            byProduct[it.productName] = byProduct[it.productName] || { qty: 0, total: 0 };
+            byProduct[it.productName].qty += it.qty;
+            byProduct[it.productName].total += it.qty * it.price;
+        }));
+        const top = Object.entries(byProduct).sort((a, b) => b[1].qty - a[1].qty).slice(0, 6);
+        let topHtml = `<table class="table table-sm"><thead><tr><th>Producto</th><th>Cant.</th><th>Total</th></tr></thead><tbody>`;
+        top.forEach(([name, v]) => { topHtml += `<tr><td>${name}</td><td>${v.qty}</td><td>${fmt(v.total)}</td></tr>`; });
+        topHtml += `</tbody></table>`;
+        document.getElementById('dashboard-top-products').innerHTML = top.length === 0 ? '<p class="text-muted mb-0">Sin ventas aún</p>' : topHtml;
+
+        let recentHtml = '<ul class="list-group list-group-flush">';
+        sales.slice(-6).reverse().forEach(s => {
+            recentHtml += `<li class="list-group-item d-flex justify-content-between px-0"><span>${s.number || ''} · ${s.clientName}</span><span class="fw-bold">${fmt(s.total)}</span></li>`;
+        });
+        recentHtml += '</ul>';
+        document.getElementById('dashboard-recent-sales').innerHTML = sales.length === 0 ? '<p class="text-muted mb-0">Sin ventas registradas</p>' : recentHtml;
+
+        const ctx = document.getElementById('salesChart');
+        if (ctx) {
+            if (chartSales) chartSales.destroy();
+            const days = [], amounts = [];
+            for (let i = 13; i >= 0; i--) {
+                const d = new Date(); d.setDate(d.getDate() - i);
+                const key = d.toISOString().slice(0, 10);
+                days.push(d.toLocaleDateString('es-AR', { day: '2-digit', month: '2-digit' }));
+                amounts.push(sales.filter(s => s.date.slice(0, 10) === key).reduce((a, s) => a + s.total, 0));
+            }
+            chartSales = new Chart(ctx, {
+                type: 'bar',
+                data: { labels: days, datasets: [{ label: 'Ventas ($)', data: amounts, backgroundColor: '#f97316', borderRadius: 5 }] },
+                options: { responsive: true, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true } } }
+            });
+        }
+        const pctx = document.getElementById('payChart');
+        if (pctx) {
+            if (chartPay) chartPay.destroy();
+            const monthSales = sales.filter(s => s.date.slice(0, 7) === month);
+            const methods = {};
+            monthSales.forEach(s => { methods[s.method] = (methods[s.method] || 0) + s.total; });
+            const labelsMap = { efectivo: 'Efectivo', tarjeta: 'Tarjeta', transferencia: 'Transferencia', cuenta: 'Cta. Cte.', mixto: 'Mixto' };
+            const labels = Object.keys(methods).map(k => labelsMap[k] || k);
+            const data = Object.values(methods);
+            const colors = ['#f97316', '#eab308', '#10b981', '#3b82f6', '#ef4444'];
+            chartPay = new Chart(pctx, {
+                type: 'doughnut',
+                data: { labels, datasets: [{ data, backgroundColor: colors.slice(0, labels.length) }] },
+                options: { responsive: true, plugins: { legend: { position: 'bottom' } } }
+            });
+        }
+    }
+
+    function openProductModal(p) {
+        document.getElementById('productId').value = p ? p.id : '';
+        document.getElementById('pCode').value = p ? (p.code || '') : '';
+        document.getElementById('pName').value = p ? p.name : '';
+        document.getElementById('pCategory').value = p ? (p.category || '') : '';
+        document.getElementById('pUnit').value = p ? p.unit : '';
+        document.getElementById('pIva').value = p ? (p.iva || 21) : 21;
+        document.getElementById('pStock').value = p ? p.stock : 0;
+        document.getElementById('pMinStock').value = p ? p.minStock : 5;
+        document.getElementById('pBuyPrice').value = p ? p.buyPrice : 0;
+        document.getElementById('pSellPrice').value = p ? p.sellPrice : 0;
+        document.getElementById('pWholePrice').value = p ? (p.wholePrice || 0) : 0;
+        document.getElementById('productModalTitle').textContent = p ? 'Editar Producto' : 'Nuevo Producto';
+        new bootstrap.Modal(document.getElementById('productModal')).show();
+    }
+
+    function saveProduct() {
+        const id = document.getElementById('productId').value;
+        const obj = {
+            code: document.getElementById('pCode').value.trim(),
+            name: document.getElementById('pName').value.trim(),
+            category: document.getElementById('pCategory').value.trim(),
+            unit: document.getElementById('pUnit').value.trim(),
+            iva: parseFloat(document.getElementById('pIva').value) || 0,
+            stock: parseFloat(document.getElementById('pStock').value) || 0,
+            minStock: parseFloat(document.getElementById('pMinStock').value) || 0,
+            buyPrice: parseFloat(document.getElementById('pBuyPrice').value) || 0,
+            sellPrice: parseFloat(document.getElementById('pSellPrice').value) || 0,
+            wholePrice: parseFloat(document.getElementById('pWholePrice').value) || 0,
+        };
+        if (!obj.name || !obj.unit) { showToast('Nombre y Unidad son obligatorios', 'bg-danger'); return; }
+        const products = getProducts();
+        if (id) {
+            const idx = products.findIndex(p => p.id === id);
+            if (idx !== -1) products[idx] = { ...products[idx], ...obj };
+        } else {
+            obj.id = uid();
+            products.push(obj);
+        }
+        setProducts(products);
+        bootstrap.Modal.getInstance(document.getElementById('productModal')).hide();
+        showToast('Producto guardado');
+        renderProducts();
+        if (document.getElementById('page-dashboard').classList.contains('active')) renderDashboard();
+    }
+
+    function deleteProduct(id) {
+        if (!confirm('¿Eliminar este producto?')) return;
+        setProducts(getProducts().filter(p => p.id !== id));
+        renderProducts();
+        showToast('Producto eliminado', 'bg-danger');
+    }
+
+    function renderProducts() {
+        const products = getProducts();
+        const q = (document.getElementById('productSearch')?.value || '').toLowerCase();
+        const filtered = products.filter(p => (p.name + ' ' + (p.category || '') + ' ' + (p.code || '')).toLowerCase().includes(q));
+        let html = `<table class="table table-hover align-middle"><thead><tr><th>Código</th><th>Nombre</th><th>Categoría</th><th>Stock</th><th>Mín.</th><th>Compra</th><th>Venta</th><th>Mayorista</th><th>IVA</th><th></th></tr></thead><tbody>`;
+        filtered.forEach(p => {
+            const low = p.stock <= p.minStock;
+            html += `<tr>
+                <td class="text-muted">${p.code || '-'}</td>
+                <td><strong>${p.name}</strong></td>
+                <td>${p.category || '-'}</td>
+                <td class="${low ? 'text-danger fw-bold' : ''}">${p.stock} ${p.unit}</td>
+                <td>${p.minStock}</td>
+                <td>${fmt(p.buyPrice)}</td>
+                <td>${fmt(p.sellPrice)}</td>
+                <td>${fmt(p.wholePrice || 0)}</td>
+                <td>${p.iva || 0}%</td>
+                <td>
+                    <button class="btn btn-sm btn-outline-primary me-1" onclick="openProductModal(getProductById('${p.id}'))"><i class="fas fa-edit"></i></button>
+                    <button class="btn btn-sm btn-outline-danger" onclick="deleteProduct('${p.id}')"><i class="fas fa-trash"></i></button>
+                </td>
+            </tr>`;
+        });
+        html += `</tbody></table>`;
+        document.getElementById('productTableContainer').innerHTML = filtered.length === 0 ? '<p class="text-muted">Sin productos</p>' : html;
+    }
+    function getProductById(id) { return getProducts().find(p => p.id === id); }
+
+    function renderStock() {
+        const products = getProducts();
+        populateSelect('adjustProduct', products, p => p.name, 'Seleccionar producto');
+        let opts = '<option value="">Todos los productos</option>';
+        products.forEach(p => { opts += `<option value="${p.id}">${p.name}</option>`; });
+        document.getElementById('movFilter').innerHTML = opts;
+        renderMovements();
+    }
+
+    function saveAdjust() {
+        const productId = document.getElementById('adjustProduct').value;
+        if (!productId) { showToast('Seleccione un producto', 'bg-warning'); return; }
+        const qty = parseFloat(document.getElementById('adjustQty').value) || 0;
+        if (qty <= 0) { showToast('Cantidad inválida', 'bg-danger'); return; }
+        const type = document.getElementById('adjustType').value;
+        const reason = document.getElementById('adjustReason').value;
+        const products = getProducts();
+        const prod = products.find(p => p.id === productId);
+        if (!prod) return;
+        if (type === 'salida' && prod.stock < qty) { showToast(`Stock insuficiente. Disponible: ${prod.stock}`, 'bg-danger'); return; }
+        prod.stock = type === 'entrada' ? prod.stock + qty : prod.stock - qty;
+        setProducts(products);
+        addStockMovement(prod.id, prod.name, type === 'entrada' ? 'ajuste+entrada' : 'ajuste+salida', qty, reason);
+        renderStock();
+        showToast('Stock ajustado');
+    }
+
+    function renderMovements() {
+        const filter = document.getElementById('movFilter').value;
+        let movs = getMovements().slice().reverse();
+        if (filter) movs = movs.filter(m => m.productId === filter);
+        const typeMap = {
+            'compra': ['bg-success', 'Compra'],
+            'venta': ['bg-danger', 'Venta'],
+            'ajuste+entrada': ['bg-info', 'Ajuste +'],
+            'ajuste+salida': ['bg-warning', 'Ajuste -'],
+            'entrada': ['bg-info', 'Entrada'],
+            'salida': ['bg-warning', 'Salida']
+        };
+        let html = `<table class="table table-sm table-hover"><thead><tr><th>Fecha</th><th>Producto</th><th>Tipo</th><th>Cant.</th><th>Motivo</th></tr></thead><tbody>`;
+        movs.slice(0, 80).forEach(m => {
+            const t = typeMap[m.type] || ['bg-secondary', m.type];
+            html += `<tr><td class="text-muted">${fmtDate(m.date)}</td><td>${m.productName}</td><td><span class="badge ${t[0]}">${t[1]}</span></td><td class="fw-bold">${m.qty}</td><td>${m.note || '-'}</td></tr>`;
+        });
+        html += `</tbody></table>`;
+        document.getElementById('movementsContainer').innerHTML = movs.length === 0 ? '<p class="text-muted">Sin movimientos</p>' : html;
+    }
+
+    function openClientModal(c) {
+        document.getElementById('clientId').value = c ? c.id : '';
+        document.getElementById('cName').value = c ? c.name : '';
+        document.getElementById('cDoc').value = c ? (c.doc || '') : '';
+        document.getElementById('cCondition').value = c ? (c.condition || 'consumidor') : 'consumidor';
+        document.getElementById('cPhone').value = c ? (c.phone || '') : '';
+        document.getElementById('cEmail').value = c ? (c.email || '') : '';
+        document.getElementById('cAddress').value = c ? (c.address || '') : '';
+        new bootstrap.Modal(document.getElementById('clientModal')).show();
+    }
+
+    function saveClient() {
+        const id = document.getElementById('clientId').value;
+        const obj = {
+            name: document.getElementById('cName').value.trim(),
+            doc: document.getElementById('cDoc').value.trim(),
+            condition: document.getElementById('cCondition').value,
+            phone: document.getElementById('cPhone').value.trim(),
+            email: document.getElementById('cEmail').value.trim(),
+            address: document.getElementById('cAddress').value.trim(),
+        };
+        if (!obj.name) { showToast('Nombre obligatorio', 'bg-danger'); return; }
+        const clients = getClients();
+        if (id) {
+            const idx = clients.findIndex(c => c.id === id);
+            if (idx !== -1) clients[idx] = { ...clients[idx], ...obj };
+        } else {
+            obj.id = uid();
+            clients.push(obj);
+        }
+        setClients(clients);
+        bootstrap.Modal.getInstance(document.getElementById('clientModal')).hide();
+        showToast('Cliente guardado');
+        renderClients();
+    }
+
+    function deleteClient(id) {
+        if (!confirm('¿Eliminar este cliente? Se conservarán sus ventas en el historial.')) return;
+        setClients(getClients().filter(c => c.id !== id));
+        renderClients();
+        showToast('Cliente eliminado', 'bg-danger');
+    }
+
+    function renderClients() {
+        const clients = getClients();
+        const q = (document.getElementById('clientSearch')?.value || '').toLowerCase();
+        const filtered = clients.filter(c => c.name.toLowerCase().includes(q));
+        let html = `<table class="table table-hover align-middle"><thead><tr><th>Nombre</th><th>DNI/CUIT</th><th>Condición</th><th>Teléfono</th><th>Saldo Cta. Cte.</th><th></th></tr></thead><tbody>`;
+        filtered.forEach(c => {
+            const bal = clientBalance(c.id);
+            html += `<tr><td><strong>${c.name}</strong></td><td>${c.doc || '-'}</td><td>${c.condition === 'respin' ? 'Resp. Inscripto' : c.condition === 'monotributo' ? 'Monotributista' : 'Consumidor Final'}</td><td>${c.phone || '-'}</td>
+                <td class="${bal > 0 ? 'text-danger fw-bold' : ''}">${fmt(bal)}</td>
+                <td>
+                    <button class="btn btn-sm btn-outline-info me-1" onclick="openClientDetail('${c.id}')"><i class="fas fa-eye"></i></button>
+                    <button class="btn btn-sm btn-outline-primary me-1" onclick="openClientModal(getClientById('${c.id}'))"><i class="fas fa-edit"></i></button>
+                    <button class="btn btn-sm btn-outline-danger" onclick="deleteClient('${c.id}')"><i class="fas fa-trash"></i></button>
+                </td></tr>`;
+        });
+        html += `</tbody></table>`;
+        document.getElementById('clientTableContainer').innerHTML = filtered.length === 0 ? '<p class="text-muted">Sin clientes</p>' : html;
+    }
+    function getClientById(id) { return getClients().find(c => c.id === id); }
+
+    function openClientDetail(id) {
+        const c = getClientById(id);
+        if (!c) return;
+        document.getElementById('cdName').textContent = c.name;
+        document.getElementById('cdInfo').innerHTML = `
+            <div class="col-md-6"><strong>DNI/CUIT:</strong> ${c.doc || '-'}</div>
+            <div class="col-md-6"><strong>Condición:</strong> ${c.condition === 'respin' ? 'Resp. Inscripto' : c.condition === 'monotributo' ? 'Monotributista' : 'Consumidor Final'}</div>
+            <div class="col-md-6"><strong>Teléfono:</strong> ${c.phone || '-'}</div>
+            <div class="col-md-6"><strong>Email:</strong> ${c.email || '-'}</div>
+            <div class="col-md-12"><strong>Dirección:</strong> ${c.address || '-'}</div>
+            <div class="col-12"><h5 class="mt-2 ${clientBalance(c.id) > 0 ? 'text-danger' : 'text-success'}">Saldo Total: ${fmt(clientBalance(c.id))}</h5></div>`;
+
+        const debts = getSales().filter(s => s.clientId === id && (s.remaining || 0) > 0).slice().reverse();
+        let debtHtml = `<table class="table table-sm"><thead><tr><th>Nro</th><th>Fecha</th><th>Total</th><th>Pagado</th><th>Saldo</th><th></th></tr></thead><tbody>`;
+        debts.forEach(s => {
+            debtHtml += `<tr><td>${s.number}</td><td>${fmtDate(s.date)}</td><td>${fmt(s.total)}</td><td>${fmt(s.total - s.remaining)}</td><td class="text-danger fw-bold">${fmt(s.remaining)}</td>
+                <td><button class="btn btn-sm btn-outline-success" onclick="openPayModal('${s.id}')"><i class="fas fa-hand-holding-dollar me-1"></i>Cobrar</button></td></tr>`;
+        });
+        debtHtml += `</tbody></table>`;
+        document.getElementById('cdDebts').innerHTML = debts.length === 0 ? '<p class="text-muted">Sin deudas pendientes</p>' : debtHtml;
+
+        const pays = getPayments().filter(p => p.clientId === id).slice().reverse();
+        let payHtml = `<table class="table table-sm"><thead><tr><th>Recibo</th><th>Fecha</th><th>Monto</th><th>Método</th><th>Nota</th><th></th></tr></thead><tbody>`;
+        pays.forEach(p => {
+            payHtml += `<tr><td>${p.number}</td><td>${fmtDate(p.date)}</td><td class="text-success fw-bold">${fmt(p.amount)}</td><td>${p.method}</td><td>${p.note || '-'}</td>
+                <td><button class="btn btn-sm btn-outline-secondary" onclick="printRecibo('${p.id}')"><i class="fas fa-print"></i></button></td></tr>`;
+        });
+        payHtml += `</tbody></table>`;
+        document.getElementById('cdPayments').innerHTML = pays.length === 0 ? '<p class="text-muted">Sin recibos</p>' : payHtml;
+
+        new bootstrap.Modal(document.getElementById('clientDetailModal')).show();
+    }
+
+    function openSupplierModal(s) {
+        document.getElementById('supplierId').value = s ? s.id : '';
+        document.getElementById('sName').value = s ? s.name : '';
+        document.getElementById('sPhone').value = s ? (s.phone || '') : '';
+        document.getElementById('sEmail').value = s ? (s.email || '') : '';
+        document.getElementById('sAddress').value = s ? (s.address || '') : '';
+        new bootstrap.Modal(document.getElementById('supplierModal')).show();
+    }
+
+    function saveSupplier() {
+        const id = document.getElementById('supplierId').value;
+        const obj = {
+            name: document.getElementById('sName').value.trim(),
+            phone: document.getElementById('sPhone').value.trim(),
+            email: document.getElementById('sEmail').value.trim(),
+            address: document.getElementById('sAddress').value.trim(),
+        };
+        if (!obj.name) { showToast('Nombre obligatorio', 'bg-danger'); return; }
+        const suppliers = getSuppliers();
+        if (id) {
+            const idx = suppliers.findIndex(s => s.id === id);
+            if (idx !== -1) suppliers[idx] = { ...suppliers[idx], ...obj };
+        } else {
+            obj.id = uid();
+            suppliers.push(obj);
+        }
+        setSuppliers(suppliers);
+        bootstrap.Modal.getInstance(document.getElementById('supplierModal')).hide();
+        showToast('Proveedor guardado');
+        renderSuppliers();
+    }
+
+    function deleteSupplier(id) {
+        if (!confirm('¿Eliminar este proveedor?')) return;
+        setSuppliers(getSuppliers().filter(s => s.id !== id));
+        renderSuppliers();
+        showToast('Proveedor eliminado', 'bg-danger');
+    }
+
+    function renderSuppliers() {
+        const suppliers = getSuppliers();
+        let html = `<table class="table table-hover align-middle"><thead><tr><th>Nombre</th><th>Teléfono</th><th>Email</th><th></th></tr></thead><tbody>`;
+        suppliers.forEach(s => {
+            html += `<tr><td><strong>${s.name}</strong></td><td>${s.phone || '-'}</td><td>${s.email || '-'}</td>
+                <td><button class="btn btn-sm btn-outline-primary me-1" onclick="openSupplierModal(getSupplierById('${s.id}'))"><i class="fas fa-edit"></i></button>
+                <button class="btn btn-sm btn-outline-danger" onclick="deleteSupplier('${s.id}')"><i class="fas fa-trash"></i></button></td></tr>`;
+        });
+        html += `</tbody></table>`;
+        document.getElementById('supplierTableContainer').innerHTML = suppliers.length === 0 ? '<p class="text-muted">Sin proveedores</p>' : html;
+    }
+    function getSupplierById(id) { return getSuppliers().find(s => s.id === id); }
+
+    let saleItems = [];
+    let quoteItems = [];
+    let purchaseItems = [];
+
+    function renderSalesView() {
+        populateSelect('saleClient', getClients(), c => c.name, 'Consumidor Final');
+        populateSelect('saleSeller', getSellers(), v => v.name, 'Sin vendedor');
+        renderSaleItems();
+        renderSalesHistory();
+    }
+
+    function toggleMixto() {
+        document.getElementById('mixtoWrap').style.display = document.getElementById('saleMethod').value === 'mixto' ? '' : 'none';
+        renderSaleItems();
+    }
+
+    function updateSaleClient() {
+        const c = getClientById(document.getElementById('saleClient').value);
+        if (!c) return;
+        const type = document.getElementById('saleInvoiceType');
+        if (c.condition === 'respin') type.value = 'Factura A';
+        else if (c.condition === 'monotributo') type.value = 'Factura C';
+        else type.value = 'Ticket';
+    }
+
+    function addSaleRow() {
+        if (getProducts().length === 0) { showToast('Primero agregue productos', 'bg-warning'); return; }
+        saleItems.push({ id: uid(), productId: '', qty: 1, price: 0, name: '', unit: '', iva: 0 });
+        renderSaleItems();
+    }
+
+    function removeSaleRow(id) {
+        saleItems = saleItems.filter(i => i.id !== id);
+        renderSaleItems();
+    }
+
+    function renderSaleItems() {
+        const products = getProducts();
+        const whole = document.getElementById('saleWholeToggle').checked;
+        const discount = parseFloat(document.getElementById('saleDiscount').value) || 0;
+        let html = `<table class="table table-bordered align-middle"><thead><tr><th>Producto</th><th>Unidad</th><th>Cantidad</th><th>Precio</th><th>Subtotal</th><th></th></tr></thead><tbody>`;
+        let subtotal = 0;
+        saleItems.forEach(it => {
+            const prod = products.find(p => p.id === it.productId);
+            const options = products.map(p => `<option value="${p.id}" ${p.id === it.productId ? 'selected' : ''}>${p.name}</option>`).join('');
+            const qty = parseFloat(it.qty) || 0;
+            const price = parseFloat(it.price) || 0;
+            subtotal += qty * price;
+            html += `<tr>
+                <td><select class="form-select" onchange="updateSaleItem('${it.id}', 'productId', this.value)"><option value="">Seleccionar...</option>${options}</select></td>
+                <td>${prod ? prod.unit : '-'}</td>
+                <td><input type="number" class="form-control" value="${qty}" min="0.01" oninput="updateSaleItem('${it.id}', 'qty', this.value)"></td>
+                <td><input type="number" class="form-control" value="${price}" step="0.01" oninput="updateSaleItem('${it.id}', 'price', this.value)"></td>
+                <td class="fw-bold">${fmt(qty * price)}</td>
+                <td><button class="btn btn-sm btn-outline-danger" onclick="removeSaleRow('${it.id}')"><i class="fas fa-times"></i></button></td>
+            </tr>`;
+        });
+        html += `</tbody></table>`;
+        document.getElementById('saleItemsContainer').innerHTML = html;
+        const total = subtotal * (1 - discount / 100);
+        document.getElementById('saleSubtotal').textContent = fmt(subtotal);
+        document.getElementById('saleTotal').textContent = fmt(total);
+    }
+
+    function updateSaleItem(id, field, value) {
+        const it = saleItems.find(i => i.id === id);
+        if (!it) return;
+        if (field === 'productId') {
+            const prod = getProducts().find(p => p.id === value);
+            if (prod) {
+                it.productId = prod.id; it.name = prod.name; it.unit = prod.unit; it.iva = prod.iva || 0;
+                const whole = document.getElementById('saleWholeToggle').checked;
+                it.price = whole && prod.wholePrice > 0 ? prod.wholePrice : prod.sellPrice;
+            } else {
+                it.productId = ''; it.price = 0;
+            }
+        } else if (field === 'qty') { it.qty = parseFloat(value) || 0; }
+        else if (field === 'price') { it.price = parseFloat(value) || 0; }
+        renderSaleItems();
+    }
+
+    function saveSale() {
+        const clientId = document.getElementById('saleClient').value;
+        const client = clientId ? getClientById(clientId) : null;
+        const method = document.getElementById('saleMethod').value;
+        if ((method === 'cuenta' || method === 'mixto') && !client) { showToast('Cuenta corriente requiere seleccionar un cliente', 'bg-warning'); return; }
+        const valid = saleItems.filter(it => it.productId && (parseFloat(it.qty) || 0) > 0);
+        if (valid.length === 0) { showToast('Agregue al menos un producto válido', 'bg-warning'); return; }
+        const discount = parseFloat(document.getElementById('saleDiscount').value) || 0;
+        const products = getProducts();
+        const errors = [];
+        let subtotal = 0;
+        const items = [];
+        valid.forEach(it => {
+            const prod = products.find(p => p.id === it.productId);
+            if (!prod) return;
+            if (prod.stock < it.qty) { errors.push(`${prod.name}: stock ${prod.stock}`); return; }
+            subtotal += it.qty * it.price;
+            items.push({ productId: prod.id, productName: prod.name, qty: it.qty, unit: prod.unit, price: it.price, iva: prod.iva || 0 });
+        });
+        if (errors.length > 0) { showToast('Stock insuficiente: ' + errors.join(' | '), 'bg-danger'); return; }
+        const total = subtotal * (1 - discount / 100);
+        let paid = total, remaining = 0;
+        if (method === 'cuenta') { paid = 0; remaining = total; }
+        if (method === 'mixto') {
+            const cash = parseFloat(document.getElementById('saleCashAmount').value) || 0;
+            paid = Math.min(cash, total);
+            remaining = total - paid;
+        }
+        const invoiceType = document.getElementById('saleInvoiceType').value;
+        const sellerId = document.getElementById('saleSeller').value;
+        const seller = sellerId ? getSellers().find(v => v.id === sellerId) : null;
+        const number = (invoiceType === 'Ticket' ? 'T-' : '') + nextNum();
+        const profit = items.reduce((acc, it) => {
+            const prod = getProducts().find(p => p.id === it.productId);
+            return acc + (it.qty * (it.price - (prod ? prod.buyPrice : 0)));
+        }, 0);
+        const sale = {
+            id: uid(), number, invoiceType, date: new Date().toISOString(),
+            clientId: client ? client.id : '', clientName: client ? client.name : 'Consumidor Final',
+            sellerId: seller ? seller.id : '', sellerName: seller ? seller.name : 'Sin vendedor',
+            items, subtotal, discount, total, paid, remaining, method, profit,
+            quoteId: null, status: remaining > 0 ? 'A cobrar' : 'Pagada'
+        };
+        items.forEach(it => {
+            const prod = products.find(p => p.id === it.productId);
+            if (prod) prod.stock -= it.qty;
+        });
+        setProducts(products);
+        items.forEach(it => addStockMovement(it.productId, it.productName, 'venta', it.qty, 'Venta ' + number));
+        const sales = getSales();
+        sales.push(sale);
+        setSales(sales);
+        if (method === 'efectivo') addCajaMovement('venta', total, 'Venta ' + number, sale.id);
+        if (method === 'mixto' && paid > 0) addCajaMovement('venta', paid, 'Venta ' + number + ' (efectivo)', sale.id);
+        if (quoteItems.length === 0 && saleItems.length > 0 && saleItems[0].quoteId) {
+            const quotes = getQuotes();
+            const q = quotes.find(qq => qq.id === saleItems[0].quoteId);
+            if (q) { q.status = 'convertida'; q.saleId = sale.id; setQuotes(quotes); }
+        }
+        saleItems = [];
+        renderSalesView();
+        showToast(`Venta ${number} registrada: ${fmt(total)}`);
+        if (confirm('¿Imprimir comprobante?')) printSale(sale.id);
+        if (document.getElementById('page-dashboard').classList.contains('active')) renderDashboard();
+    }
+
+    function renderSalesHistory() {
+        const q = (document.getElementById('salesHistorySearch')?.value || '').toLowerCase();
+        let sales = getSales().slice().reverse();
+        if (q) sales = sales.filter(s => (s.number + ' ' + s.clientName + ' ' + (s.items || []).map(i => i.productName).join(' ')).toLowerCase().includes(q));
+        const methodLabels = { efectivo: 'Efectivo', tarjeta: 'Tarjeta', transferencia: 'Transferencia', cuenta: 'Cta. Cte.', mixto: 'Mixto' };
+        let html = `<table class="table table-hover align-middle"><thead><tr><th>Nro</th><th>Fecha</th><th>Cliente</th><th>Vendedor</th><th>Método</th><th>Items</th><th>Total</th><th>Saldo</th><th></th></tr></thead><tbody>`;
+        sales.slice(0, 60).forEach(s => {
+            const pay = s.remaining > 0 ? `<span class="badge badge-met bg-danger">${fmt(s.remaining)}</span>` : '<span class="badge badge-met bg-success">Pagada</span>';
+            html += `<tr>
+                <td>${s.number}<br><small class="text-muted">${s.invoiceType}</small></td>
+                <td>${fmtDate(s.date)}</td>
+                <td>${s.clientName}</td>
+                <td>${s.sellerName || '—'}</td>
+                <td>${methodLabels[s.method] || s.method}</td>
+                <td class="text-muted small">${s.items.map(i => `${i.qty}x ${i.productName}`).join(', ')}</td>
+                <td class="fw-bold">${fmt(s.total)}</td>
+                <td>${pay}</td>
+                <td style="white-space:nowrap;">
+                    <button class="btn btn-sm btn-outline-secondary me-1" onclick="printSale('${s.id}')" title="Imprimir"><i class="fas fa-print"></i></button>
+                    ${s.remaining > 0 ? `<button class="btn btn-sm btn-outline-success me-1" onclick="openPayModal('${s.id}')" title="Cobrar"><i class="fas fa-hand-holding-dollar"></i></button>` : ''}
+                    <button class="btn btn-sm btn-outline-danger" onclick="anularSale('${s.id}')" title="Anular"><i class="fas fa-ban"></i></button>
+                </td>
+            </tr>`;
+        });
+        html += `</tbody></table>`;
+        document.getElementById('salesHistoryContainer').innerHTML = sales.length === 0 ? '<p class="text-muted">Sin ventas</p>' : html;
+    }
+
+    function anularSale(id) {
+        if (!confirm('¿Anular esta venta? Se devolverá el stock y se eliminará el movimiento de caja.')) return;
+        const sales = getSales();
+        const sale = sales.find(s => s.id === id);
+        if (!sale) return;
+        const products = getProducts();
+        sale.items.forEach(it => {
+            const prod = products.find(p => p.id === it.productId);
+            if (prod) prod.stock += it.qty;
+        });
+        setProducts(products);
+        sale.items.forEach(it => addStockMovement(it.productId, it.productName, 'ajuste+entrada', it.qty, 'Anulación venta ' + sale.number));
+        const caja = getCaja();
+        caja.movements = caja.movements.filter(m => !(m.saleId === sale.id));
+        setCaja(caja);
+        setSales(sales.filter(s => s.id !== id));
+        renderSalesHistory();
+        showToast('Venta anulada', 'bg-danger');
+    }
+
+    function openPayModal(saleId) {
+        const sale = getSales().find(s => s.id === saleId);
+        if (!sale) return;
+        document.getElementById('paySaleId').value = saleId;
+        document.getElementById('payAmount').value = sale.remaining.toFixed(2);
+        document.getElementById('payNote').value = '';
+        new bootstrap.Modal(document.getElementById('payModal')).show();
+    }
+
+    function savePayment() {
+        const saleId = document.getElementById('paySaleId').value;
+        const amount = parseFloat(document.getElementById('payAmount').value) || 0;
+        const method = document.getElementById('payMethod').value;
+        const note = document.getElementById('payNote').value.trim();
+        const sales = getSales();
+        const sale = sales.find(s => s.id === saleId);
+        if (!sale) { showToast('Venta no encontrada', 'bg-danger'); return; }
+        if (amount <= 0) { showToast('Monto inválido', 'bg-danger'); return; }
+        if (amount > sale.remaining) { showToast(`El monto supera el saldo (${fmt(sale.remaining)})`, 'bg-danger'); return; }
+        sale.paid += amount;
+        sale.remaining -= amount;
+        sale.status = sale.remaining <= 0 ? 'Pagada' : 'Parcial';
+        setSales(sales);
+        const payment = { id: uid(), number: nextReciboNum(), date: new Date().toISOString(), clientId: sale.clientId, saleId, amount, method, note };
+        const payments = getPayments();
+        payments.push(payment);
+        setPayments(payments);
+        if (method === 'efectivo') addCajaMovement('recibo', amount, 'Recibo ' + payment.number + ' - ' + sale.clientName);
+        bootstrap.Modal.getInstance(document.getElementById('payModal')).hide();
+        showToast(`Recibo ${payment.number} registrado`);
+        const cd = document.getElementById('clientDetailModal');
+        if (cd.classList.contains('show')) openClientDetail(sale.clientId);
+        renderSalesHistory();
+        renderClients();
+    }
+
+    function printSale(id) {
+        const sale = getSales().find(s => s.id === id);
+        if (!sale) return;
+        const st = loadSettings();
+        const e = st.empresa;
+        const methodLabels = { efectivo: 'Efectivo', tarjeta: 'Tarjeta', transferencia: 'Transferencia', cuenta: 'Cuenta Corriente', mixto: 'Mixto (Efectivo + Cta.)' };
+        let itemsHtml = '';
+        const ivaGroups = {};
+        sale.items.forEach(it => {
+            itemsHtml += `<tr><td>${it.qty} x ${it.productName}<br><small>${fmt(it.price)} c/u</small></td><td class="tc">${fmt(it.qty * it.price)}</td></tr>`;
+            const iva = it.iva || 0;
+            const base = it.qty * it.price * iva / (100 + iva);
+            ivaGroups[iva] = (ivaGroups[iva] || 0) + base;
+        });
+        let ivaHtml = '';
+        Object.entries(ivaGroups).forEach(([iva, val]) => {
+            ivaHtml += `<tr><td>IVA ${iva}%</td><td class="tc">${fmt(val)}</td></tr>`;
+        });
+        document.getElementById('printArea').innerHTML = `
+            <div class="ticket">
+                <h4>${e.nombre || 'Mi Corralón'}</h4>
+                <div class="tc">CUIT: ${e.cuit || '—'}</div>
+                <div class="tc">${e.direccion || ''}</div>
+                <div class="tc">${e.telefono || ''}</div>
+                <div class="tt">${sale.invoiceType || 'TICKET'}</div>
+                <div class="tc">Nro: ${sale.number}</div>
+                <div class="tc">${fmtDate(sale.date)}</div>
+                <hr>
+                <div>Cliente: ${sale.clientName}</div>
+                ${sale.clientDoc ? `<div>Doc: ${sale.clientDoc}</div>` : ''}
+                <div>Vendedor: ${sale.sellerName || '—'}</div>
+                <hr>
+                <table>${itemsHtml}</table>
+                <hr>
+                <table>
+                    <tr><td>Subtotal</td><td class="tc">${fmt(sale.subtotal)}</td></tr>
+                    ${sale.discount > 0 ? `<tr><td>Descuento ${sale.discount}%</td><td class="tc">-${fmt(sale.subtotal * sale.discount / 100)}</td></tr>` : ''}
+                    ${ivaHtml}
+                    <tr><td class="total">TOTAL</td><td class="tc total">${fmt(sale.total)}</td></tr>
+                </table>
+                <hr>
+                <div>Forma de pago: ${methodLabels[sale.method] || sale.method}</div>
+                ${sale.method === 'mixto' ? `<div>Efectivo: ${fmt(sale.paid)} · Saldo: ${fmt(sale.remaining)}</div>` : ''}
+                ${sale.remaining > 0 ? `<div class="tc" style="font-weight:700;">SALDO PENDIENTE: ${fmt(sale.remaining)}</div>` : ''}
+                <hr>
+                <div class="tc">¡Gracias por su compra!</div>
+            </div>`;
+        window.print();
+    }
+
+    function printRecibo(id) {
+        const p = getPayments().find(p => p.id === id);
+        if (!p) return;
+        const st = loadSettings();
+        const e = st.empresa;
+        const sale = getSales().find(s => s.id === p.saleId);
+        document.getElementById('printArea').innerHTML = `
+            <div class="ticket">
+                <h4>${e.nombre || 'Mi Corralón'}</h4>
+                <div class="tc">CUIT: ${e.cuit || '—'}</div>
+                <div class="tt">RECIBO DE COBRO</div>
+                <div class="tc">Nro: ${p.number}</div>
+                <div class="tc">Fecha: ${fmtDate(p.date)}</div>
+                <hr>
+                <div>Cliente: ${getClients().find(c => c.id === p.clientId)?.name || '—'}</div>
+                <div>Venta: ${sale ? sale.number : '—'}</div>
+                <div>Recibí la suma de: <strong>${fmt(p.amount)}</strong></div>
+                <div>Forma de pago: ${p.method}</div>
+                ${p.note ? `<div>Nota: ${p.note}</div>` : ''}
+                <hr>
+                <div class="tc">Firma y aclaración</div>
+            </div>`;
+        window.print();
+    }
+
+    function renderQuotesView() {
+        populateSelect('quoteClient', getClients(), c => c.name, 'Consumidor Final');
+        if (!document.getElementById('quoteValidUntil').value) {
+            const d = new Date(); d.setDate(d.getDate() + 7);
+            document.getElementById('quoteValidUntil').value = d.toISOString().slice(0, 10);
+        }
+        renderQuoteItems();
+        renderQuotesList();
+    }
+
+    function addQuoteRow() {
+        if (getProducts().length === 0) { showToast('Primero agregue productos', 'bg-warning'); return; }
+        quoteItems.push({ id: uid(), productId: '', qty: 1, price: 0, name: '', unit: '', iva: 0 });
+        renderQuoteItems();
+    }
+
+    function removeQuoteRow(id) {
+        quoteItems = quoteItems.filter(i => i.id !== id);
+        renderQuoteItems();
+    }
+
+    function renderQuoteItems() {
+        const products = getProducts();
+        let html = `<table class="table table-bordered align-middle"><thead><tr><th>Producto</th><th>Unidad</th><th>Cantidad</th><th>Precio</th><th>Subtotal</th><th></th></tr></thead><tbody>`;
+        let total = 0;
+        quoteItems.forEach(it => {
+            const prod = products.find(p => p.id === it.productId);
+            const options = products.map(p => `<option value="${p.id}" ${p.id === it.productId ? 'selected' : ''}>${p.name}</option>`).join('');
+            const qty = parseFloat(it.qty) || 0;
+            const price = parseFloat(it.price) || 0;
+            total += qty * price;
+            html += `<tr>
+                <td><select class="form-select" onchange="updateQuoteItem('${it.id}', 'productId', this.value)"><option value="">Seleccionar...</option>${options}</select></td>
+                <td>${prod ? prod.unit : '-'}</td>
+                <td><input type="number" class="form-control" value="${qty}" min="0.01" oninput="updateQuoteItem('${it.id}', 'qty', this.value)"></td>
+                <td><input type="number" class="form-control" value="${price}" step="0.01" oninput="updateQuoteItem('${it.id}', 'price', this.value)"></td>
+                <td class="fw-bold">${fmt(qty * price)}</td>
+                <td><button class="btn btn-sm btn-outline-danger" onclick="removeQuoteRow('${it.id}')"><i class="fas fa-times"></i></button></td>
+            </tr>`;
+        });
+        html += `</tbody></table>`;
+        document.getElementById('quoteItemsContainer').innerHTML = html;
+        document.getElementById('quoteTotal').textContent = fmt(total);
+    }
+
+    function updateQuoteItem(id, field, value) {
+        const it = quoteItems.find(i => i.id === id);
+        if (!it) return;
+        if (field === 'productId') {
+            const prod = getProducts().find(p => p.id === value);
+            if (prod) { it.productId = prod.id; it.name = prod.name; it.unit = prod.unit; it.iva = prod.iva || 0; it.price = prod.sellPrice; }
+            else { it.productId = ''; it.price = 0; }
+        } else if (field === 'qty') { it.qty = parseFloat(value) || 0; }
+        else if (field === 'price') { it.price = parseFloat(value) || 0; }
+        renderQuoteItems();
+    }
+
+    function saveQuote() {
+        const clientId = document.getElementById('quoteClient').value;
+        const client = clientId ? getClientById(clientId) : null;
+        const valid = quoteItems.filter(it => it.productId && (parseFloat(it.qty) || 0) > 0);
+        if (valid.length === 0) { showToast('Agregue al menos un producto válido', 'bg-warning'); return; }
+        const validUntil = document.getElementById('quoteValidUntil').value;
+        const total = valid.reduce((a, it) => a + it.qty * it.price, 0);
+        const quote = {
+            id: uid(), number: 'P-' + nextQuoteNum(), date: new Date().toISOString(), validUntil,
+            clientId: client ? client.id : '', clientName: client ? client.name : 'Consumidor Final',
+            items: valid.map(it => ({ productId: it.productId, productName: it.name, qty: it.qty, unit: it.unit, price: it.price })),
+            total, status: 'pendiente', saleId: null
+        };
+        const quotes = getQuotes();
+        quotes.push(quote);
+        setQuotes(quotes);
+        quoteItems = [];
+        renderQuotesView();
+        showToast(`Presupuesto ${quote.number} guardado`);
+    }
+
+    function renderQuotesList() {
+        const quotes = getQuotes().slice().reverse();
+        let html = '';
+        quotes.forEach(q => {
+            const expired = q.status === 'pendiente' && q.validUntil && q.validUntil < todayKey();
+            html += `<div class="border rounded p-3 mb-3">
+                <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+                    <div>
+                        <strong>${q.number}</strong> · ${fmtDate(q.date)} · Cliente: ${q.clientName}<br>
+                        <small class="text-muted">Vence: ${q.validUntil || '—'} · Total: <strong>${fmt(q.total)}</strong></small>
+                    </div>
+                    <div>
+                        ${q.status === 'pendiente' ? `<span class="badge badge-met ${expired ? 'bg-danger' : 'bg-warning text-dark'}">${expired ? 'Vencido' : 'Pendiente'}</span>` : '<span class="badge badge-met bg-success">Convertido</span>'}
+                    </div>
+                </div>
+                <div class="small text-muted mt-1">${q.items.map(i => `${i.qty}x ${i.productName}`).join(', ')}</div>
+                ${q.status === 'pendiente' ? `<div class="mt-2">
+                    <button class="btn btn-sm btn-success me-1" onclick="convertQuote('${q.id}')"><i class="fas fa-cash-register me-1"></i>Convertir en Venta</button>
+                    <button class="btn btn-sm btn-outline-danger" onclick="deleteQuote('${q.id}')"><i class="fas fa-trash"></i></button>
+                </div>` : ''}
+            </div>`;
+        });
+        document.getElementById('quotesListContainer').innerHTML = quotes.length === 0 ? '<p class="text-muted">Sin presupuestos</p>' : html;
+    }
+
+    function convertQuote(id) {
+        const q = getQuotes().find(q => q.id === id);
+        if (!q) return;
+        saleItems = q.items.map(it => ({ id: uid(), productId: it.productId, qty: it.qty, price: it.price, name: it.productName, unit: it.unit, quoteId: q.id }));
+        saleItems[0].quoteId = q.id;
+        document.querySelectorAll('.sidebar .nav-item').forEach(i => i.classList.remove('active'));
+        document.querySelector('.sidebar .nav-item[data-page="sales"]').classList.add('active');
+        document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+        document.getElementById('page-sales').classList.add('active');
+        renderSalesView();
+        if (q.clientId) { document.getElementById('saleClient').value = q.clientId; updateSaleClient(); }
+        showToast('Presupuesto cargado en venta');
+    }
+
+    function deleteQuote(id) {
+        if (!confirm('¿Eliminar este presupuesto?')) return;
+        setQuotes(getQuotes().filter(q => q.id !== id));
+        renderQuotesList();
+        showToast('Presupuesto eliminado', 'bg-danger');
+    }
+
+    function renderPurchasesView() {
+        populateSelect('purchaseSupplier', getSuppliers(), s => s.name);
+        renderPurchaseItems();
+        renderPurchasesHistory();
+    }
+
+    function addPurchaseRow() {
+        if (getProducts().length === 0) { showToast('Primero agregue productos', 'bg-warning'); return; }
+        purchaseItems.push({ id: uid(), productId: '', qty: 1, buyPrice: 0, name: '', unit: '' });
+        renderPurchaseItems();
+    }
+
+    function removePurchaseRow(id) {
+        purchaseItems = purchaseItems.filter(i => i.id !== id);
+        renderPurchaseItems();
+    }
+
+    function renderPurchaseItems() {
+        const products = getProducts();
+        let html = `<table class="table table-bordered align-middle"><thead><tr><th>Producto</th><th>Unidad</th><th>Cantidad</th><th>Precio Compra</th><th>Subtotal</th><th></th></tr></thead><tbody>`;
+        let total = 0;
+        purchaseItems.forEach(it => {
+            const prod = products.find(p => p.id === it.productId);
+            const options = products.map(p => `<option value="${p.id}" ${p.id === it.productId ? 'selected' : ''}>${p.name}</option>`).join('');
+            const qty = parseFloat(it.qty) || 0;
+            const price = parseFloat(it.buyPrice) || 0;
+            total += qty * price;
+            html += `<tr>
+                <td><select class="form-select" onchange="updatePurchaseItem('${it.id}', 'productId', this.value)"><option value="">Seleccionar...</option>${options}</select></td>
+                <td>${prod ? prod.unit : '-'}</td>
+                <td><input type="number" class="form-control" value="${qty}" min="0.01" oninput="updatePurchaseItem('${it.id}', 'qty', this.value)"></td>
+                <td><input type="number" class="form-control" value="${price}" step="0.01" oninput="updatePurchaseItem('${it.id}', 'buyPrice', this.value)"></td>
+                <td class="fw-bold">${fmt(qty * price)}</td>
+                <td><button class="btn btn-sm btn-outline-danger" onclick="removePurchaseRow('${it.id}')"><i class="fas fa-times"></i></button></td>
+            </tr>`;
+        });
+        html += `</tbody></table>`;
+        document.getElementById('purchaseItemsContainer').innerHTML = html;
+        document.getElementById('purchaseTotal').textContent = fmt(total);
+    }
+
+    function updatePurchaseItem(id, field, value) {
+        const it = purchaseItems.find(i => i.id === id);
+        if (!it) return;
+        if (field === 'productId') {
+            const prod = getProducts().find(p => p.id === value);
+            if (prod) { it.productId = prod.id; it.name = prod.name; it.unit = prod.unit; it.buyPrice = prod.buyPrice; }
+            else { it.productId = ''; it.buyPrice = 0; }
+        } else if (field === 'qty') { it.qty = parseFloat(value) || 0; }
+        else if (field === 'buyPrice') { it.buyPrice = parseFloat(value) || 0; }
+        renderPurchaseItems();
+    }
+
+    function savePurchase() {
+        const supplierId = document.getElementById('purchaseSupplier').value;
+        if (!supplierId) { showToast('Seleccione un proveedor', 'bg-warning'); return; }
+        const supplier = getSuppliers().find(s => s.id === supplierId);
+        const valid = purchaseItems.filter(it => it.productId && (parseFloat(it.qty) || 0) > 0);
+        if (valid.length === 0) { showToast('Agregue al menos un producto válido', 'bg-warning'); return; }
+        const products = getProducts();
+        const items = [];
+        let total = 0;
+        valid.forEach(it => {
+            const prod = products.find(p => p.id === it.productId);
+            if (!prod) return;
+            prod.stock += it.qty;
+            prod.buyPrice = it.buyPrice;
+            total += it.qty * it.buyPrice;
+            items.push({ productId: prod.id, productName: prod.name, qty: it.qty, unit: prod.unit, buyPrice: it.buyPrice });
+        });
+        setProducts(products);
+        items.forEach(it => addStockMovement(it.productId, it.productName, 'compra', it.qty, 'Compra a ' + supplier.name));
+        const purchase = { id: uid(), supplierId: supplier.id, supplierName: supplier.name, date: new Date().toISOString(), items, total };
+        const purchases = getPurchases();
+        purchases.push(purchase);
+        setPurchases(purchases);
+        purchaseItems = [];
+        renderPurchasesView();
+        showToast(`Compra registrada por ${fmt(total)}`);
+    }
+
+    function renderPurchasesHistory() {
+        const purchases = getPurchases().slice().reverse();
+        let html = `<table class="table table-hover align-middle"><thead><tr><th>Fecha</th><th>Proveedor</th><th>Items</th><th>Total</th></tr></thead><tbody>`;
+        purchases.slice(0, 40).forEach(p => {
+            html += `<tr><td>${fmtDate(p.date)}</td><td>${p.supplierName}</td><td class="text-muted small">${p.items.map(i => `${i.qty}x ${i.productName}`).join(', ')}</td><td class="fw-bold">${fmt(p.total)}</td></tr>`;
+        });
+        html += `</tbody></table>`;
+        document.getElementById('purchasesHistoryContainer').innerHTML = purchases.length === 0 ? '<p class="text-muted">Sin compras</p>' : html;
+    }
+
+    function addCajaMovement(type, amount, desc, saleId) {
+        const caja = getCaja();
+        if (caja.status !== 'abierta') return;
+        caja.movements.push({ id: uid(), date: new Date().toISOString(), type, amount: parseFloat(amount) || 0, desc, saleId: saleId || null });
+        setCaja(caja);
+    }
+
+    function renderCaja() {
+        const caja = getCaja();
+        const balance = cashBalance();
+        let html = '';
+        if (caja.status === 'abierta') {
+            html = `<h5 class="mb-3 text-success"><i class="fas fa-door-open me-2"></i>Caja Abierta</h5>
+                <div class="mb-2"><strong>Abierta el:</strong> ${fmtDate(caja.openedAt)}</div>
+                <div class="mb-3"><strong>Saldo actual:</strong> <span class="fs-4 fw-bold">${fmt(balance)}</span></div>
+                <div class="d-grid gap-2">
+                    <button class="btn btn-success" onclick="openCajaModal('ingreso')"><i class="fas fa-plus me-2"></i>Ingreso Manual</button>
+                    <button class="btn btn-warning" onclick="openCajaModal('gasto')"><i class="fas fa-minus me-2"></i>Gasto / Egreso</button>
+                    <button class="btn btn-secondary" onclick="openCajaModal('retiro')"><i class="fas fa-hand-holding-dollar me-2"></i>Retiro (Dueño)</button>
+                    <button class="btn btn-danger" onclick="closeCaja()"><i class="fas fa-door-closed me-2"></i>Cerrar Caja</button>
+                </div>`;
+        } else {
+            const last = caja.lastArqueo;
+            html = `<h5 class="mb-3 text-danger"><i class="fas fa-door-closed me-2"></i>Caja Cerrada</h5>
+                ${last ? `<div class="mb-3 p-3 bg-light rounded"><strong>Último cierre:</strong><br>
+                    <div>Fecha: ${fmtDate(caja.closedAt || '')}</div>
+                    <div>Esperado: ${fmt(last.expected)}</div>
+                    <div>Contado: ${fmt(last.counted)}</div>
+                    <div class="${last.diff === 0 ? 'text-success' : 'text-danger fw-bold'}">Diferencia: ${fmt(last.diff)}</div>
+                </div>` : ''}
+                <label class="form-label fw-bold">Monto inicial</label>
+                <input type="number" step="0.01" class="form-control mb-3" id="openCajaAmount" value="0">
+                <button class="btn btn-success w-100 btn-lg" onclick="openCaja()"><i class="fas fa-door-open me-2"></i>Abrir Caja</button>`;
+        }
+        document.getElementById('cajaStatusCard').innerHTML = html;
+        renderCajaMovements();
+    }
+
+    function openCaja() {
+        const amount = parseFloat(document.getElementById('openCajaAmount').value) || 0;
+        const caja = getCaja();
+        caja.status = 'abierta';
+        caja.openedAt = new Date().toISOString();
+        caja.closedAt = null;
+        if (amount > 0) caja.movements.push({ id: uid(), date: new Date().toISOString(), type: 'apertura', amount, desc: 'Apertura de caja' });
+        setCaja(caja);
+        renderCaja();
+        showToast('Caja abierta');
+    }
+
+    function closeCaja() {
+        const caja = getCaja();
+        const expected = cashBalance();
+        const counted = prompt('Monto contado en caja:', expected.toFixed(2));
+        if (counted === null) return;
+        const countedNum = parseFloat(counted) || 0;
+        caja.status = 'cerrada';
+        caja.closedAt = new Date().toISOString();
+        caja.lastArqueo = { expected, counted: countedNum, diff: countedNum - expected };
+        setCaja(caja);
+        renderCaja();
+        const diff = countedNum - expected;
+        showToast(`Caja cerrada. Diferencia: ${fmt(diff)}`, diff === 0 ? 'bg-success' : 'bg-warning');
+    }
+
+    function openCajaModal(type) {
+        document.getElementById('cajaModalType').value = type;
+        document.getElementById('cajaAmount').value = '';
+        document.getElementById('cajaDesc').value = '';
+        const titles = { ingreso: 'Ingreso Manual', gasto: 'Gasto / Egreso', retiro: 'Retiro del Dueño' };
+        document.getElementById('cajaModalTitle').textContent = titles[type];
+        document.getElementById('cajaCatWrap').style.display = type === 'gasto' ? '' : 'none';
+        new bootstrap.Modal(document.getElementById('cajaModal')).show();
+    }
+
+    function saveCajaMovement() {
+        const type = document.getElementById('cajaModalType').value;
+        const amount = parseFloat(document.getElementById('cajaAmount').value) || 0;
+        const desc = document.getElementById('cajaDesc').value.trim() || (type === 'gasto' ? 'Gasto ' + document.getElementById('cajaCategory').value : 'Movimiento manual');
+        if (amount <= 0) { showToast('Monto inválido', 'bg-danger'); return; }
+        const caja = getCaja();
+        const signed = (type === 'gasto' || type === 'retiro') ? -amount : amount;
+        caja.movements.push({ id: uid(), date: new Date().toISOString(), type, amount: signed, desc });
+        setCaja(caja);
+        bootstrap.Modal.getInstance(document.getElementById('cajaModal')).hide();
+        renderCaja();
+        showToast('Movimiento registrado');
+    }
+
+    function renderCajaMovements() {
+        const from = document.getElementById('cajaFilterFrom')?.value;
+        const to = document.getElementById('cajaFilterTo')?.value;
+        let movs = getCaja().movements.slice().reverse();
+        if (from) movs = movs.filter(m => m.date.slice(0, 10) >= from);
+        if (to) movs = movs.filter(m => m.date.slice(0, 10) <= to);
+        const badge = { apertura: ['bg-success', 'Apertura'], venta: ['bg-primary', 'Venta'], recibo: ['bg-info', 'Cobro'], ingreso: ['bg-success', 'Ingreso'], gasto: ['bg-danger', 'Gasto'], retiro: ['bg-warning text-dark', 'Retiro'] };
+        let html = `<table class="table table-sm table-hover"><thead><tr><th>Fecha</th><th>Tipo</th><th>Descripción</th><th>Monto</th></tr></thead><tbody>`;
+        let bal = 0;
+        movs.slice(0, 80).forEach(m => {
+            bal += m.amount;
+            const b = badge[m.type] || ['bg-secondary', m.type];
+            html += `<tr><td class="text-muted">${fmtDate(m.date)}</td><td><span class="badge ${b[0]}">${b[1]}</span></td><td>${m.desc || '-'}</td><td class="${m.amount >= 0 ? 'mov-in' : 'mov-out'}">${m.amount >= 0 ? '+' : ''}${fmt(m.amount)}</td></tr>`;
+        });
+        html += `</tbody></table>`;
+        document.getElementById('cajaMovementsContainer').innerHTML = movs.length === 0 ? '<p class="text-muted">Sin movimientos</p>' : html;
+    }
+
+    let reportFrom = null, reportTo = null;
+
+    function renderReports() {
+        if (!reportFrom) {
+            const d = new Date(); d.setMonth(d.getMonth() - 1);
+            document.getElementById('repFrom').value = d.toISOString().slice(0, 10);
+            document.getElementById('repTo').value = todayKey();
+            reportFrom = document.getElementById('repFrom').value;
+            reportTo = document.getElementById('repTo').value;
+        }
+        const sales = getSales().filter(s => s.date.slice(0, 10) >= reportFrom && s.date.slice(0, 10) <= reportTo);
+        const purchases = getPurchases().filter(p => p.date.slice(0, 10) >= reportFrom && p.date.slice(0, 10) <= reportTo);
+        const cajaMovs = getCaja().movements.filter(m => m.date.slice(0, 10) >= reportFrom && m.date.slice(0, 10) <= reportTo);
+        const receipts = getPayments().filter(p => p.date.slice(0, 10) >= reportFrom && p.date.slice(0, 10) <= reportTo);
+
+        const totalSales = sales.reduce((a, s) => a + s.total, 0);
+        const totalProfit = sales.reduce((a, s) => a + (s.profit || 0), 0);
+        const totalPurchases = purchases.reduce((a, p) => a + p.total, 0);
+        const totalGastos = cajaMovs.filter(m => m.type === 'gasto').reduce((a, m) => a + Math.abs(m.amount), 0);
+        const totalRecibos = receipts.reduce((a, p) => a + p.amount, 0);
+
+        document.getElementById('reportSummary').innerHTML = `
+            <div class="col-md-3"><div class="stat-card"><div class="label">Ventas</div><div class="value">${fmt(totalSales)}</div></div></div>
+            <div class="col-md-3"><div class="stat-card" style="border-left-color:#27ae60;"><div class="label">Ganancia</div><div class="value">${fmt(totalProfit)}</div></div></div>
+            <div class="col-md-3"><div class="stat-card" style="border-left-color:#e74c3c;"><div class="label">Compras</div><div class="value">${fmt(totalPurchases)}</div></div></div>
+            <div class="col-md-3"><div class="stat-card" style="border-left-color:#f39c12;"><div class="label">Gastos / Cobros</div><div class="value"><span class="text-danger">${fmt(totalGastos)}</span><br><small class="text-success">${fmt(totalRecibos)} cobrados</small></div></div></div>`;
+
+        const bySeller = {};
+        sales.forEach(s => {
+            const key = s.sellerName || 'Sin vendedor';
+            bySeller[key] = bySeller[key] || { count: 0, total: 0 };
+            bySeller[key].count++;
+            bySeller[key].total += s.total;
+        });
+        const sellers = getSellers();
+        let sHtml = `<table class="table table-sm"><thead><tr><th>Vendedor</th><th>Ventas</th><th>Total</th><th>Comisión</th></tr></thead><tbody>`;
+        Object.entries(bySeller).forEach(([name, v]) => {
+            const commPct = sellers.find(x => x.name === name)?.commission || 0;
+            sHtml += `<tr><td>${name}</td><td>${v.count}</td><td>${fmt(v.total)}</td><td>${fmt(v.total * commPct / 100)} (${commPct}%)</td></tr>`;
+        });
+        sHtml += `</tbody></table>`;
+        document.getElementById('reportSellers').innerHTML = sales.length === 0 ? '<p class="text-muted">Sin ventas en el período</p>' : sHtml;
+
+        const byMethod = {};
+        const labelsMap = { efectivo: 'Efectivo', tarjeta: 'Tarjeta', transferencia: 'Transferencia', cuenta: 'Cta. Cte.', mixto: 'Mixto' };
+        sales.forEach(s => {
+            const key = labelsMap[s.method] || s.method;
+            byMethod[key] = byMethod[key] || { count: 0, total: 0 };
+            byMethod[key].count++;
+            byMethod[key].total += s.total;
+        });
+        let mHtml = `<table class="table table-sm"><thead><tr><th>Forma de Pago</th><th>Ventas</th><th>Total</th></tr></thead><tbody>`;
+        Object.entries(byMethod).forEach(([k, v]) => { mHtml += `<tr><td>${k}</td><td>${v.count}</td><td>${fmt(v.total)}</td></tr>`; });
+        mHtml += `</tbody></table>`;
+        document.getElementById('reportMethods').innerHTML = sales.length === 0 ? '<p class="text-muted">Sin ventas en el período</p>' : mHtml;
+
+        const byProduct = {};
+        sales.forEach(s => (s.items || []).forEach(it => {
+            byProduct[it.productName] = byProduct[it.productName] || { qty: 0, total: 0 };
+            byProduct[it.productName].qty += it.qty;
+            byProduct[it.productName].total += it.qty * it.price;
+        }));
+        const topP = Object.entries(byProduct).sort((a, b) => b[1].total - a[1].total).slice(0, 10);
+        let pHtml = `<table class="table table-sm"><thead><tr><th>Producto</th><th>Cant.</th><th>Total</th></tr></thead><tbody>`;
+        topP.forEach(([n, v]) => { pHtml += `<tr><td>${n}</td><td>${v.qty}</td><td>${fmt(v.total)}</td></tr>`; });
+        pHtml += `</tbody></table>`;
+        document.getElementById('reportTopProducts').innerHTML = topP.length === 0 ? '<p class="text-muted">Sin datos</p>' : pHtml;
+
+        const byClient = {};
+        sales.forEach(s => {
+            if (!s.clientId) return;
+            byClient[s.clientName] = byClient[s.clientName] || { count: 0, total: 0 };
+            byClient[s.clientName].count++;
+            byClient[s.clientName].total += s.total;
+        });
+        const topC = Object.entries(byClient).sort((a, b) => b[1].total - a[1].total).slice(0, 10);
+        let cHtml = `<table class="table table-sm"><thead><tr><th>Cliente</th><th>Ventas</th><th>Total</th></tr></thead><tbody>`;
+        topC.forEach(([n, v]) => { cHtml += `<tr><td>${n}</td><td>${v.count}</td><td>${fmt(v.total)}</td></tr>`; });
+        cHtml += `</tbody></table>`;
+        document.getElementById('reportTopClients').innerHTML = topC.length === 0 ? '<p class="text-muted">Sin datos</p>' : cHtml;
+
+        let hHtml = `<table class="table table-sm"><thead><tr><th>Nro</th><th>Fecha</th><th>Cliente</th><th>Total</th><th>Ganancia</th></tr></thead><tbody>`;
+        sales.slice().reverse().forEach(s => {
+            hHtml += `<tr><td>${s.number}</td><td>${fmtDate(s.date)}</td><td>${s.clientName}</td><td>${fmt(s.total)}</td><td class="text-success">${fmt(s.profit || 0)}</td></tr>`;
+        });
+        hHtml += `</tbody></table>`;
+        document.getElementById('reportSalesHistory').innerHTML = sales.length === 0 ? '<p class="text-muted">Sin ventas en el período</p>' : hHtml;
+    }
+
+    function applyReportFilter() {
+        reportFrom = document.getElementById('repFrom').value;
+        reportTo = document.getElementById('repTo').value;
+        if (!reportFrom || !reportTo) { showToast('Defina el rango de fechas', 'bg-warning'); return; }
+        renderReports();
+        showToast('Filtro aplicado');
+    }
+
+    function renderConfig() {
+        const s = loadSettings();
+        document.getElementById('cfName').value = s.empresa.nombre;
+        document.getElementById('cfCuit').value = s.empresa.cuit;
+        document.getElementById('cfAddress').value = s.empresa.direccion;
+        document.getElementById('cfPhone').value = s.empresa.telefono;
+        document.getElementById('cfNextNum').value = s.nextNum;
+        document.getElementById('cfNextQuote').value = s.nextQuote;
+        document.getElementById('cfNextRecibo').value = s.nextRecibo;
+        renderSellers();
+    }
+
+    function saveCompany() {
+        const s = loadSettings();
+        s.empresa = {
+            nombre: document.getElementById('cfName').value.trim() || 'Mi Corralón',
+            cuit: document.getElementById('cfCuit').value.trim(),
+            direccion: document.getElementById('cfAddress').value.trim(),
+            telefono: document.getElementById('cfPhone').value.trim(),
+        };
+        saveSettings(s);
+        showToast('Datos de empresa guardados');
+    }
+
+    function saveNumbers() {
+        const s = loadSettings();
+        s.nextNum = parseInt(document.getElementById('cfNextNum').value) || 1;
+        s.nextQuote = parseInt(document.getElementById('cfNextQuote').value) || 1;
+        s.nextRecibo = parseInt(document.getElementById('cfNextRecibo').value) || 1;
+        saveSettings(s);
+        showToast('Numeración actualizada');
+    }
+
+    function renderSellers() {
+        const sellers = getSellers();
+        let html = `<table class="table table-sm"><thead><tr><th>Nombre</th><th>Comisión</th><th></th></tr></thead><tbody>`;
+        sellers.forEach(v => {
+            html += `<tr><td>${v.name}</td><td>${v.commission}%</td><td><button class="btn btn-sm btn-outline-danger" onclick="deleteSeller('${v.id}')"><i class="fas fa-trash"></i></button></td></tr>`;
+        });
+        html += `</tbody></table>`;
+        document.getElementById('sellersContainer').innerHTML = html;
+    }
+
+    function addSeller() {
+        const name = document.getElementById('sellerName').value.trim();
+        const commission = parseFloat(document.getElementById('sellerCommission').value) || 0;
+        if (!name) { showToast('Ingrese el nombre', 'bg-warning'); return; }
+        const sellers = getSellers();
+        sellers.push({ id: uid(), name, commission });
+        setSellers(sellers);
+        document.getElementById('sellerName').value = '';
+        document.getElementById('sellerCommission').value = '';
+        renderSellers();
+        showToast('Vendedor agregado');
+    }
+
+    function deleteSeller(id) {
+        if (!confirm('¿Eliminar este vendedor?')) return;
+        setSellers(getSellers().filter(v => v.id !== id));
+        renderSellers();
+        showToast('Vendedor eliminado', 'bg-danger');
+    }
+
+    function download(filename, content, mime) {
+        const blob = new Blob([content], { type: mime || 'application/octet-stream' });
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = filename;
+        a.click();
+        URL.revokeObjectURL(a.href);
+    }
+
+    function exportBackup() {
+        const data = {};
+        Object.keys(K).forEach(key => {
+            if (key === 'settings') data[key] = JSON.parse(localStorage.getItem(K[key]) || '{}');
+            else data[key] = DB.get(K[key]);
+        });
+        download('corralon_backup_' + todayKey() + '.json', JSON.stringify(data, null, 2), 'application/json');
+        showToast('Respaldo exportado');
+    }
+
+    function importBackup(event) {
+        const file = event.target.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = function (e) {
+            try {
+                const data = JSON.parse(e.target.result);
+                Object.keys(K).forEach(key => {
+                    if (data[key] !== undefined) localStorage.setItem(K[key], JSON.stringify(data[key]));
+                });
+                showToast('Respaldo importado correctamente');
+                setTimeout(() => location.reload(), 1200);
+            } catch (err) {
+                showToast('Archivo inválido', 'bg-danger');
+            }
+        };
+        reader.readAsText(file);
+        event.target.value = '';
+    }
+
+    function exportProductsCSV() {
+        let csv = '\uFEFFCodigo;Nombre;Categoria;Unidad;Stock;Minimo;PrecioCompra;PrecioVenta;PrecioMayorista;IVA\n';
+        getProducts().forEach(p => {
+            csv += [p.code || '', p.name, p.category || '', p.unit, p.stock, p.minStock, p.buyPrice, p.sellPrice, p.wholePrice || 0, p.iva || 0].join(';') + '\n';
+        });
+        download('productos_' + todayKey() + '.csv', csv, 'text/csv;charset=utf-8');
+        showToast('CSV de productos exportado');
+    }
+
+    function exportSalesCSV() {
+        let csv = '\uFEFFFecha;Numero;Tipo;Cliente;Vendedor;Metodo;Items;Subtotal;Descuento;Total;Ganancia;Saldo\n';
+        getSales().forEach(s => {
+            csv += [s.date, s.number, s.invoiceType, s.clientName, s.sellerName || '', s.method,
+                s.items.map(i => `${i.qty}x ${i.productName}`).join(' | '), s.subtotal, s.discount, s.total, s.profit || 0, s.remaining || 0].join(';') + '\n';
+        });
+        download('ventas_' + todayKey() + '.csv', csv, 'text/csv;charset=utf-8');
+        showToast('CSV de ventas exportado');
+    }
+
+    function wipeData() {
+        if (!confirm('¿Borrar TODOS los datos? Esta acción no se puede deshacer. Se recomienda exportar un respaldo antes.')) return;
+        if (!confirm('¿Confirmás que querés borrar todo definitivamente?')) return;
+        Object.keys(K).forEach(key => localStorage.removeItem(K[key]));
+        location.reload();
+    }
+
+    document.addEventListener('DOMContentLoaded', function () {
+        Chart.defaults.font.family = "'Inter','Segoe UI',system-ui,sans-serif";
+        Chart.defaults.color = '#64748b';
+        document.getElementById('tbDate').textContent = new Date().toLocaleDateString('es-AR', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+        renderDashboard();
+        renderProducts();
+        renderClients();
+        renderSuppliers();
+        renderSalesView();
+        renderQuotesView();
+        renderPurchasesView();
+        renderStock();
+        renderCaja();
+        renderReports();
+        renderConfig();
+    });
+</script>
+</body>
+</html>
